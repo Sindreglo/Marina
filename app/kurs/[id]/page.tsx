@@ -2,7 +2,7 @@
 
 import { Suspense, useState, useEffect } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { Check } from 'lucide-react'
+import { Check, Menu } from 'lucide-react'
 import { useProgress } from '@/hooks/useProgress'
 import { useCourseContext } from '@/contexts/CourseContext'
 import { flatLessons } from '@/lib/utils'
@@ -21,6 +21,7 @@ function CourseViewer() {
   const { course, loading, updateCourse } = useCourseContext()
   const { completed, toggle } = useProgress(params.id)
   const [saving, setSaving] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
 
   const isOwner = !!(course && user && course.teacherId === user.uid)
 
@@ -64,18 +65,28 @@ function CourseViewer() {
         activeId={activeId}
         completed={completed}
         onSelect={navigate}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {active && (
         <main key={active.id} className="flex-1 overflow-y-auto animate-fade-in">
-          <div className="min-h-full flex flex-col px-9">
-            <div className="flex-1 py-8 max-w-2xl mx-auto w-full">
-              <p className="text-[13px] text-ink-light mb-5">
-                <span className="text-accent font-semibold">{active.moduleTitle}</span>
-                <span className="mx-1.5">›</span>
-                <span>Leksjon {active.lessonIndex + 1}</span>
-              </p>
-              <h1 className="font-serif text-[28px] leading-snug mb-7">{active.title}</h1>
+          <div className="min-h-full flex flex-col px-5 md:px-9">
+            <div className="flex-1 py-6 md:py-8 max-w-2xl mx-auto w-full">
+              <div className="flex items-center gap-3 mb-5">
+                <button
+                  onClick={() => setSidebarOpen(true)}
+                  className="md:hidden p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
+                >
+                  <Menu size={18} />
+                </button>
+                <p className="text-[13px] text-ink-light">
+                  <span className="text-accent font-semibold">{active.moduleTitle}</span>
+                  <span className="mx-1.5">›</span>
+                  <span>Leksjon {active.lessonIndex + 1}</span>
+                </p>
+              </div>
+              <h1 className="font-serif text-[26px] md:text-[28px] leading-snug mb-7">{active.title}</h1>
               <LessonContent lesson={active} />
             </div>
 
@@ -93,7 +104,14 @@ function CourseViewer() {
                   {completed.has(active.id) ? 'Fullført — klikk for å angre' : 'Marker som fullført'}
                 </button>
               )}
-              <NavButtons prev={prev} next={next} onNav={navigate} />
+              <NavButtons
+                prev={prev}
+                next={next}
+                onNav={navigate}
+                exitHref={!isOwner ? '/' : undefined}
+                onFinish={!isOwner && !next ? () => toggle(active.id) : undefined}
+                isFinished={!isOwner && !next ? completed.has(active.id) : undefined}
+              />
             </div>
           </div>
         </main>

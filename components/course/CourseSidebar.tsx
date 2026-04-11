@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil } from 'lucide-react'
+import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil, X } from 'lucide-react'
 import type { Course, LessonType } from '@/types/course'
 import { flatLessons } from '@/lib/utils'
 
@@ -27,6 +27,8 @@ interface Props {
   onAddModule?: () => void
   onRenameModule?: (moduleId: string, title: string) => void
   onRenameLesson?: (lessonId: string, title: string) => void
+  isOpen?: boolean
+  onClose?: () => void
 }
 
 export function CourseSidebar({
@@ -40,6 +42,8 @@ export function CourseSidebar({
   onAddModule,
   onRenameModule,
   onRenameLesson,
+  isOpen = true,
+  onClose,
 }: Props) {
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null)
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
@@ -71,17 +75,31 @@ export function CourseSidebar({
     setEditingLessonId(null)
   }
 
+  function handleSelect(id: string) {
+    onSelect(id)
+    onClose?.()
+  }
+
   const flat = flatLessons(course)
   const doneCount = flat.filter((l) => completed.has(l.id)).length
 
-  return (
+  const sidebar = (
     <aside className="w-72 shrink-0 bg-bg-card border-r border-border flex flex-col h-full overflow-hidden">
       {/* Header */}
       <div className="px-4 py-4 border-b border-border shrink-0">
-        <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-light mb-1.5">
-          {isEditor ? 'Redigerer kurs' : 'Kursinnhold'}
-        </p>
-        <p className="text-[15px] font-semibold leading-snug">{course.title}</p>
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <p className="text-[11px] font-semibold uppercase tracking-wide text-ink-light mb-1.5">
+              {isEditor ? 'Redigerer kurs' : 'Kursinnhold'}
+            </p>
+            <p className="text-[15px] font-semibold leading-snug">{course.title}</p>
+          </div>
+          {onClose && (
+            <button onClick={onClose} className="md:hidden shrink-0 p-1 text-ink-muted hover:text-ink transition-colors mt-0.5">
+              <X size={18} />
+            </button>
+          )}
+        </div>
         {!isEditor && flat.length > 0 && (
           <>
             <div className="mt-2.5 h-1 bg-border rounded-full overflow-hidden">
@@ -97,7 +115,7 @@ export function CourseSidebar({
         )}
         {isEditor && (
           <button
-            onClick={() => onSelect('kursinfo')}
+            onClick={() => handleSelect('kursinfo')}
             className={`mt-3 w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
               activeId === 'kursinfo'
                 ? 'bg-accent-soft text-accent'
@@ -113,7 +131,6 @@ export function CourseSidebar({
       <div className="flex-1 overflow-y-auto py-2">
         {course.modules.map((module, mi) => (
           <div key={module.id}>
-            {/* Module header */}
             <div className="flex items-center gap-1.5 px-4 py-2.5">
               <span className="w-4 h-4 rounded text-[10px] font-extrabold bg-accent-soft text-accent inline-flex items-center justify-center shrink-0">
                 {mi + 1}
@@ -145,7 +162,6 @@ export function CourseSidebar({
               )}
             </div>
 
-            {/* Lessons */}
             {module.lessons.map((lesson) => {
               const isActive = lesson.id === activeId
               const isDone = completed.has(lesson.id)
@@ -158,15 +174,14 @@ export function CourseSidebar({
                     className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
                       isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
                     }`}
-                    onClick={() => !isEditingThis && onSelect(lesson.id)}
+                    onClick={() => !isEditingThis && handleSelect(lesson.id)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && onSelect(lesson.id)}
+                    onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && handleSelect(lesson.id)}
                   >
                     <span className={`shrink-0 ${isActive ? 'text-accent' : 'text-ink-light'}`}>
                       {TYPE_ICON[lesson.type]}
                     </span>
-
                     {isEditingThis ? (
                       <input
                         ref={lessonInputRef}
@@ -192,7 +207,6 @@ export function CourseSidebar({
                         <Pencil size={10} className="shrink-0 text-ink-light opacity-0 group-hover/les:opacity-100 transition-opacity" />
                       </button>
                     )}
-
                     <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
                     {onDeleteLesson && (
                       <button
@@ -209,7 +223,7 @@ export function CourseSidebar({
               return (
                 <button
                   key={lesson.id}
-                  onClick={() => onSelect(lesson.id)}
+                  onClick={() => handleSelect(lesson.id)}
                   className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
                     isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
                   }`}
@@ -257,5 +271,24 @@ export function CourseSidebar({
         )}
       </div>
     </aside>
+  )
+
+  return (
+    <>
+      {/* Desktop: always visible */}
+      <div className="hidden md:flex h-full">
+        {sidebar}
+      </div>
+
+      {/* Mobile: drawer overlay */}
+      {isOpen && (
+        <div className="md:hidden fixed inset-0 z-40 flex">
+          <div className="absolute inset-0 bg-black/40" onClick={onClose} />
+          <div className="relative h-full flex">
+            {sidebar}
+          </div>
+        </div>
+      )}
+    </>
   )
 }

@@ -44,14 +44,14 @@ export function Navbar() {
         {isOwnerNav ? (
           <>
             <div className="flex items-center gap-1">
-              <Link href="/" className="font-serif text-xl tracking-tight flex items-center gap-2 shrink-0 mr-3">
-                <span className="text-accent">●</span> Lærdom
+              <Link href="/" className="font-serif text-xl tracking-tight flex items-center gap-2 shrink-0 mr-1 md:mr-3">
+                <span className="text-accent">●</span> <span className="hidden sm:inline">Lærdom</span>
               </Link>
               <Link
                 href="/teacher"
-                className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
+                className="flex items-center gap-1.5 px-2.5 md:px-3.5 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
               >
-                <ArrowLeft size={14} /> Tilbake
+                <ArrowLeft size={14} /> <span className="hidden sm:inline">Tilbake</span>
               </Link>
               <div className="flex gap-1 p-1 bg-bg-warm rounded-lg">
                 <Link
@@ -60,7 +60,7 @@ export function Navbar() {
                     !isEditor ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'
                   }`}
                 >
-                  <BookOpen size={13} /> Kursvisning
+                  <BookOpen size={13} /> <span className="hidden sm:inline">Kursvisning</span>
                 </Link>
                 <Link
                   href={`/kurs/${courseId}/rediger`}
@@ -68,7 +68,7 @@ export function Navbar() {
                     isEditor ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'
                   }`}
                 >
-                  <PenLine size={13} /> Editor
+                  <PenLine size={13} /> <span className="hidden sm:inline">Editor</span>
                 </Link>
               </div>
             </div>
@@ -77,9 +77,9 @@ export function Navbar() {
               <button
                 onClick={editor.controls!.onSave}
                 disabled={editor.controls!.saving || !editor.controls!.canSave}
-                className="flex items-center gap-1.5 px-4 py-1.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+                className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
               >
-                <Save size={13} /> {editor.controls!.saving ? 'Lagrer...' : 'Lagre'}
+                <Save size={13} /> <span className="hidden sm:inline">{editor.controls!.saving ? 'Lagrer...' : 'Lagre'}</span>
               </button>
               <button
                 onClick={editor.controls!.onTogglePublish}
@@ -90,7 +90,7 @@ export function Navbar() {
                     : 'bg-accent text-white hover:bg-accent-hover'
                 }`}
               >
-                <Globe size={13} /> {editor.controls!.published ? 'Avpubliser' : 'Publiser'}
+                <Globe size={13} /> <span className="hidden sm:inline">{editor.controls!.published ? 'Avpubliser' : 'Publiser'}</span>
               </button>
             </div>
           </>

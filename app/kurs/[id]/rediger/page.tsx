@@ -2,6 +2,7 @@
 
 import { Suspense, useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
+import { Menu } from 'lucide-react'
 import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { EditableLesson } from '@/components/editor/EditableLesson'
@@ -23,6 +24,7 @@ function CourseEditor() {
   const { course, loading, updateCourse, deleteCourse } = useCourseContext()
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const draftRef = useRef(draft)
   draftRef.current = draft
 
@@ -160,28 +162,44 @@ function CourseEditor() {
         onAddModule={addModule}
         onRenameModule={renameModule}
         onRenameLesson={renameLesson}
+        isOpen={sidebarOpen}
+        onClose={() => setSidebarOpen(false)}
       />
 
       {isCourseInfo ? (
         <div key="kursinfo" className="flex-1 overflow-y-auto animate-fade-in">
-          <div className="px-9 py-8">
+          <div className="px-5 md:px-9 py-6 md:py-8">
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="md:hidden mb-4 p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
+            >
+              <Menu size={18} />
+            </button>
             <EditableCourseInfo
-            draft={draft}
-            onChange={(updated) => setDraft(updated)}
-            onDelete={async () => { await deleteCourse(); router.push('/teacher') }}
-          />
+              draft={draft}
+              onChange={(updated) => setDraft(updated)}
+              onDelete={async () => { await deleteCourse(); router.push('/teacher') }}
+            />
           </div>
         </div>
       ) : active ? (
         <div key={active.id} className="flex-1 flex flex-col overflow-hidden animate-fade-in">
           <div className="flex-1 overflow-y-auto">
-            <div className="min-h-full flex flex-col px-9 items-center">
-              <div className="flex-1 py-8 max-w-2xl w-full">
-                <p className="text-[13px] text-ink-light mb-5">
-                  <span className="text-accent font-semibold">{active.moduleTitle}</span>
-                  <span className="mx-1.5">›</span>
-                  <span>Redigerer leksjon {active.lessonIndex + 1}</span>
-                </p>
+            <div className="min-h-full flex flex-col px-5 md:px-9 items-center">
+              <div className="flex-1 py-6 md:py-8 max-w-2xl w-full">
+                <div className="flex items-center gap-3 mb-5">
+                  <button
+                    onClick={() => setSidebarOpen(true)}
+                    className="md:hidden p-1.5 rounded-lg text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
+                  >
+                    <Menu size={18} />
+                  </button>
+                  <p className="text-[13px] text-ink-light">
+                    <span className="text-accent font-semibold">{active.moduleTitle}</span>
+                    <span className="mx-1.5">›</span>
+                    <span>Redigerer leksjon {active.lessonIndex + 1}</span>
+                  </p>
+                </div>
                 <EditableLesson lesson={active} onChange={updateLesson} />
               </div>
               <div className="pb-6 max-w-2xl w-full">
