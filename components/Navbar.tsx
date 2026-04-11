@@ -64,18 +64,28 @@ export function Navbar() {
           )}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
           {user ? (
             <>
               <Link
-                href="/teacher"
-                className="text-[13px] text-ink-muted hover:text-ink transition-colors"
+                href="/"
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  pathname === '/' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
+                }`}
               >
-                {teacherName || user.email}
+                Landingsside
+              </Link>
+              <Link
+                href="/teacher"
+                className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  pathname.startsWith('/teacher') ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
+                }`}
+              >
+                {teacherName || 'Min side'}
               </Link>
               <button
                 onClick={handleSignOut}
-                className="text-[13px] text-ink-muted hover:text-ink transition-colors"
+                className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
               >
                 Logg ut
               </button>

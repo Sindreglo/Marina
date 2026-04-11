@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { Plus } from 'lucide-react'
+import { Plus, BookOpen } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { createCourse, getTeacherCourses, getTeacherProfile, updateTeacherProfile } from '@/lib/firestore'
 import { LoadingScreen } from '@/components/LoadingScreen'
@@ -87,22 +87,30 @@ export default function TeacherPage() {
             <Link
               key={course.id}
               href={`/kurs/${course.id}/rediger`}
-              className="text-left rounded-xl border border-border p-4 hover:border-ink/20 transition-colors group block"
+              className="group block bg-bg-card rounded-xl border border-border overflow-hidden transition-all duration-200 hover:-translate-y-1 hover:shadow-lg"
             >
-              <div className="h-20 rounded-lg mb-3" style={{ background: course.coverColor }} />
-              <div className="flex items-start justify-between gap-2">
-                <p className="font-semibold text-[14px] leading-snug group-hover:text-accent transition-colors">
-                  {course.title || 'Uten tittel'}
-                </p>
+              <div
+                className="h-28 flex items-center justify-center relative"
+                style={{ background: `linear-gradient(135deg, ${course.coverColor} 0%, ${course.coverColor}BB 100%)` }}
+              >
+                <BookOpen className="text-white/20 scale-[3]" size={20} />
+                <span className="absolute top-2.5 left-2.5 text-[11px] font-semibold px-2 py-1 rounded-md bg-white/20 text-white backdrop-blur-sm">
+                  {course.category}
+                </span>
                 <span
-                  className={`shrink-0 text-[11px] font-semibold px-2 py-0.5 rounded-full ${
+                  className={`absolute top-2.5 right-2.5 text-[11px] font-semibold px-2 py-1 rounded-md backdrop-blur-sm ${
                     course.published
-                      ? 'bg-green/10 text-green'
-                      : 'bg-neutral-100 text-ink-muted'
+                      ? 'bg-green/80 text-white'
+                      : 'bg-black/30 text-white/80'
                   }`}
                 >
                   {course.published ? 'Publisert' : 'Skjult'}
                 </span>
+              </div>
+              <div className="p-4">
+                <h3 className="text-[15px] font-semibold leading-snug">
+                  {course.title || 'Uten tittel'}
+                </h3>
               </div>
             </Link>
           ))}
