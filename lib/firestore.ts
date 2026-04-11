@@ -60,7 +60,7 @@ export async function createCourse(teacherId: string): Promise<string> {
 export async function getTeacherProfile(uid: string): Promise<TeacherProfile | null> {
   const snap = await getDoc(doc(db, 'teachers', uid))
   if (!snap.exists()) return null
-  return snap.data() as TeacherProfile
+  return { ...snap.data(), uid: snap.id } as TeacherProfile
 }
 
 export async function createTeacherProfile(uid: string): Promise<void> {
@@ -73,6 +73,7 @@ export async function createTeacherProfile(uid: string): Promise<void> {
   })
 }
 
+/** Caller must ensure the teacher document exists (call createTeacherProfile first). */
 export async function updateTeacherProfile(
   uid: string,
   data: Partial<Omit<TeacherProfile, 'uid' | 'createdAt'>>
