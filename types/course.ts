@@ -29,6 +29,7 @@ export interface Course {
   students: number
   rating: number
   published: boolean
+  teacherId: string
   createdAt: Timestamp
   modules: Module[]
 }
