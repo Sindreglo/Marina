@@ -83,8 +83,8 @@ function CourseEditor() {
     const lesson: Lesson = { id: lessonId, type: 'text', title: '', content: '', duration: '5 min', order: 0 }
     setDraft((d) => {
       if (!d) return d
-      const module: Module = { id: moduleId, title: 'Ny modul', order: d.modules.length, lessons: [lesson] }
-      return { ...d, modules: [...d.modules, module] }
+      const newModule: Module = { id: moduleId, title: 'Ny modul', order: d.modules.length, lessons: [lesson] }
+      return { ...d, modules: [...d.modules, newModule] }
     })
     setTimeout(() => navigate(lessonId), 10)
   }
