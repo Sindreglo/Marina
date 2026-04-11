@@ -1,0 +1,49 @@
+import {
+  collection,
+  doc,
+  getDoc,
+  getDocs,
+  updateDoc,
+  addDoc,
+  query,
+  where,
+  serverTimestamp,
+} from 'firebase/firestore'
+import { db } from '@/lib/firebase'
+import type { Course } from '@/types/course'
+
+export async function getCourses(): Promise<Course[]> {
+  const q = query(collection(db, 'courses'), where('published', '==', true))
+  const snap = await getDocs(q)
+  return snap.docs.map((d) => ({ ...d.data(), id: d.id }) as Course)
+}
+
+export async function getCourse(id: string): Promise<Course | null> {
+  const snap = await getDoc(doc(db, 'courses', id))
+  if (!snap.exists()) return null
+  return { ...snap.data(), id: snap.id } as Course
+}
+
+// Strips id and createdAt before writing — caller passes the full Course object
+export async function updateCourse(id: string, course: Course): Promise<void> {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const { id: _id, createdAt: _ts, ...data } = course
+  await updateDoc(doc(db, 'courses', id), data as Record<string, unknown>)
+}
+
+export async function createCourse(): Promise<string> {
+  const ref = await addDoc(collection(db, 'courses'), {
+    title: 'Nytt kurs',
+    description: '',
+    category: 'Annet',
+    level: 'Nybegynner',
+    coverColor: '#E8553D',
+    instructor: '',
+    students: 0,
+    rating: 0,
+    published: false,
+    createdAt: serverTimestamp(),
+    modules: [],
+  })
+  return ref.id
+}
