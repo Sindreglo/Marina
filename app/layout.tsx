@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { DM_Sans, DM_Serif_Display } from 'next/font/google'
 import './globals.css'
 import { Navbar } from '@/components/Navbar'
+import { AuthProvider } from '@/contexts/AuthContext'
 
 const dmSans = DM_Sans({
   subsets: ['latin'],
@@ -25,8 +26,10 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="no" className={`${dmSans.variable} ${dmSerifDisplay.variable}`}>
       <body className="font-sans bg-bg text-ink antialiased">
-        <Navbar />
-        {children}
+        <AuthProvider>
+          <Navbar />
+          {children}
+        </AuthProvider>
       </body>
     </html>
   )
