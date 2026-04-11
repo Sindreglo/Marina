@@ -4,8 +4,13 @@ import { useState } from 'react'
 import { Trash2 } from 'lucide-react'
 import type { Course } from '@/types/course'
 
-const LEVELS = ['Nybegynner', 'Videregående', 'Avansert']
-const CATEGORIES = ['Teknologi', 'Økonomi', 'Design', 'Helse', 'Språk', 'Matematikk', 'Vitenskap', 'Historie', 'Kunst', 'Annet']
+const LEVELS = ['1P', '1T', '2P', 'S1', 'S2', 'R1', 'R2', 'PY']
+const CATEGORIES = [
+  'Algebra', 'Geometri', 'Trigonometri', 'Funksjoner',
+  'Statistikk', 'Sannsynlighet', 'Kombinatorikk',
+  'Differensialregning', 'Integralregning', 'Vektorer',
+  'Rekker og følger', 'Tallteori',
+]
 const COLORS = [
   '#2563eb', '#7c3aed', '#db2777', '#dc2626',
   '#ea580c', '#ca8a04', '#16a34a', '#0891b2',

@@ -44,8 +44,8 @@ export async function createCourse(teacherId: string): Promise<string> {
   const ref = await addDoc(collection(db, 'courses'), {
     title: 'Nytt kurs',
     description: '',
-    category: 'Annet',
-    level: 'Nybegynner',
+    category: '',
+    level: '',
     coverColor: '#E8553D',
     teacherId,
     students: 0,

@@ -15,10 +15,7 @@ export default function LandingPage() {
       <StatsRow />
 
       <section id="kurs" className="max-w-5xl mx-auto px-6 pb-12">
-        <div className="flex items-center justify-between mb-5">
-          <h2 className="font-serif text-2xl">Populære kurs</h2>
-          <span className="text-sm text-accent font-semibold">Se alle →</span>
-        </div>
+        <h2 className="font-serif text-2xl mb-5">Populære kurs</h2>
 
         {loading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
