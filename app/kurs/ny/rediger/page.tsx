@@ -16,9 +16,14 @@ export default function NewCoursePage() {
     if (!user) { router.replace('/login'); return }
     if (called.current) return
     called.current = true
-    createCourse(user.uid).then((id) => {
-      router.replace(`/kurs/${id}/rediger`)
-    })
+    createCourse(user.uid)
+      .then((id) => {
+        router.replace(`/kurs/${id}/rediger`)
+      })
+      .catch((err) => {
+        console.error('Failed to create course:', err)
+        router.replace('/teacher')
+      })
   }, [router, user, loading])
 
   return <LoadingScreen />

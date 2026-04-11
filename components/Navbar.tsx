@@ -1,17 +1,26 @@
 'use client'
 
 import Link from 'next/link'
+import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { BookOpen, PenLine } from 'lucide-react'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useAuthContext } from '@/contexts/AuthContext'
+import { getTeacherProfile } from '@/lib/firestore'
 
 export function Navbar() {
   const pathname = usePathname()
   const router = useRouter()
   const { user } = useAuthContext()
   const match = pathname.match(/^\/kurs\/([^/]+)/)
+
+  const [teacherName, setTeacherName] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (!user) { setTeacherName(null); return }
+    getTeacherProfile(user.uid).then((p) => setTeacherName(p?.name || null))
+  }, [user])
   const courseId = match?.[1] ?? null
   const isEditor = pathname.endsWith('/rediger')
 
@@ -62,7 +71,7 @@ export function Navbar() {
                 href="/teacher"
                 className="text-[13px] text-ink-muted hover:text-ink transition-colors"
               >
-                {user.email}
+                {teacherName || user.email}
               </Link>
               <button
                 onClick={handleSignOut}
