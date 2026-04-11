@@ -46,33 +46,32 @@ function CourseViewer() {
       />
 
       {active && (
-        <main key={active.id} className="flex-1 overflow-y-auto px-9 py-8 animate-fade-in">
-          <div className="max-w-2xl mx-auto">
-            <p className="text-[13px] text-ink-light mb-5">
-              <span className="text-accent font-semibold">{active.moduleTitle}</span>
-              <span className="mx-1.5">›</span>
-              <span>Leksjon {active.lessonIndex + 1}</span>
-            </p>
-
-            <h1 className="font-serif text-[28px] leading-snug mb-7">{active.title}</h1>
-
-            <div className="mb-9">
+        <main key={active.id} className="flex-1 overflow-y-auto animate-fade-in">
+          <div className="min-h-full flex flex-col px-9">
+            <div className="flex-1 py-8 max-w-2xl mx-auto w-full">
+              <p className="text-[13px] text-ink-light mb-5">
+                <span className="text-accent font-semibold">{active.moduleTitle}</span>
+                <span className="mx-1.5">›</span>
+                <span>Leksjon {active.lessonIndex + 1}</span>
+              </p>
+              <h1 className="font-serif text-[28px] leading-snug mb-7">{active.title}</h1>
               <LessonContent lesson={active} />
             </div>
 
-            <button
-              onClick={() => toggle(active.id)}
-              className={`w-full py-3.5 mb-9 rounded-xl text-[15px] font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
-                completed.has(active.id)
-                  ? 'bg-green-soft text-green border-[1.5px] border-green'
-                  : 'bg-accent text-white hover:bg-accent-hover'
-              }`}
-            >
-              <Check size={16} strokeWidth={3} />
-              {completed.has(active.id) ? 'Fullført — klikk for å angre' : 'Marker som fullført'}
-            </button>
-
-            <NavButtons prev={prev} next={next} onNav={navigate} />
+            <div className="max-w-2xl mx-auto w-full flex flex-col gap-3 pb-8 pt-4">
+              <button
+                onClick={() => toggle(active.id)}
+                className={`w-full py-3.5 rounded-xl text-[15px] font-semibold flex items-center justify-center gap-2 transition-all duration-200 ${
+                  completed.has(active.id)
+                    ? 'bg-green-soft text-green border-[1.5px] border-green'
+                    : 'bg-accent text-white hover:bg-accent-hover'
+                }`}
+              >
+                <Check size={16} strokeWidth={3} />
+                {completed.has(active.id) ? 'Fullført — klikk for å angre' : 'Marker som fullført'}
+              </button>
+              <NavButtons prev={prev} next={next} onNav={navigate} />
+            </div>
           </div>
         </main>
       )}

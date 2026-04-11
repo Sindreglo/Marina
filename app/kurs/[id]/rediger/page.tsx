@@ -129,9 +129,9 @@ function CourseEditor() {
       />
 
       {active ? (
-        <div key={active.id} className="flex-1 overflow-y-auto flex flex-col animate-fade-in">
+        <div key={active.id} className="flex-1 flex flex-col overflow-hidden animate-fade-in">
           {/* Toolbar */}
-          <div className="sticky top-0 border-b border-border px-9 py-3 flex items-center justify-between shrink-0"
+          <div className="shrink-0 border-b border-border px-9 py-3 flex items-center justify-between"
             style={{ background: 'rgba(250,249,247,0.9)', backdropFilter: 'blur(8px)' }}>
             <div className="flex items-center gap-2 text-[12px] text-ink-muted">
               <span className="w-2 h-2 rounded-full bg-yellow-400" /> Kladd
@@ -157,15 +157,19 @@ function CourseEditor() {
           </div>
 
           {/* Editor body */}
-          <div className="flex-1 px-9 py-8">
-            <p className="text-[13px] text-ink-light mb-5">
-              <span className="text-accent font-semibold">{active.moduleTitle}</span>
-              <span className="mx-1.5">›</span>
-              <span>Redigerer leksjon {active.lessonIndex + 1}</span>
-            </p>
-            <EditableLesson lesson={active} onChange={updateLesson} />
-            <div className="mt-9">
-              <NavButtons prev={prev} next={next} onNav={navigate} />
+          <div className="flex-1 overflow-y-auto">
+            <div className="min-h-full flex flex-col px-9">
+              <div className="flex-1 py-8">
+                <p className="text-[13px] text-ink-light mb-5">
+                  <span className="text-accent font-semibold">{active.moduleTitle}</span>
+                  <span className="mx-1.5">›</span>
+                  <span>Redigerer leksjon {active.lessonIndex + 1}</span>
+                </p>
+                <EditableLesson lesson={active} onChange={updateLesson} />
+              </div>
+              <div className="pb-6 pt-4 border-t border-border">
+                <NavButtons prev={prev} next={next} onNav={navigate} />
+              </div>
             </div>
           </div>
         </div>

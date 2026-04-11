@@ -76,14 +76,11 @@ export function CourseSidebar({
             {module.lessons.map((lesson) => {
               const isActive = lesson.id === activeId
               const isDone = completed.has(lesson.id)
-              return (
-                <button
-                  key={lesson.id}
-                  onClick={() => onSelect(lesson.id)}
-                  className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
-                    isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
-                  }`}
-                >
+              const rowClass = `w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
+                isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
+              }`
+              const inner = (
+                <>
                   {!isEditor ? (
                     <span
                       className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
@@ -97,7 +94,6 @@ export function CourseSidebar({
                       {TYPE_ICON[lesson.type]}
                     </span>
                   )}
-
                   <span
                     className={`text-[13px] flex-1 truncate ${
                       isActive ? 'font-semibold text-accent' : isDone && !isEditor ? 'text-ink-muted' : 'text-ink'
@@ -105,10 +101,20 @@ export function CourseSidebar({
                   >
                     {lesson.title || 'Uten tittel'}
                   </span>
-
                   <span className="text-[11px] text-ink-light shrink-0">{lesson.duration}</span>
-
-                  {isEditor && onDeleteLesson && (
+                </>
+              )
+              return isEditor ? (
+                <div
+                  key={lesson.id}
+                  className={rowClass}
+                  onClick={() => onSelect(lesson.id)}
+                  role="button"
+                  tabIndex={0}
+                  onKeyDown={(e) => e.key === 'Enter' && onSelect(lesson.id)}
+                >
+                  {inner}
+                  {onDeleteLesson && (
                     <button
                       onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
                       className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
@@ -116,6 +122,14 @@ export function CourseSidebar({
                       <Trash2 size={13} />
                     </button>
                   )}
+                </div>
+              ) : (
+                <button
+                  key={lesson.id}
+                  onClick={() => onSelect(lesson.id)}
+                  className={rowClass}
+                >
+                  {inner}
                 </button>
               )
             })}
