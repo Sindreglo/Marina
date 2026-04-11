@@ -16,8 +16,13 @@ export function Navbar() {
   const isEditor = pathname.endsWith('/rediger')
 
   async function handleSignOut() {
-    await signOut(auth)
-    router.push('/')
+    try {
+      await signOut(auth)
+    } catch (error) {
+      console.error('Sign out failed:', error)
+    } finally {
+      router.push('/')
+    }
   }
 
   return (
