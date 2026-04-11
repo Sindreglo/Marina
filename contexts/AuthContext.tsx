@@ -10,7 +10,7 @@ interface AuthContextValue {
   loading: boolean
 }
 
-const AuthContext = createContext<AuthContextValue>({ user: null, loading: true })
+const AuthContext = createContext<AuthContextValue | undefined>(undefined)
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
@@ -28,5 +28,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 }
 
 export function useAuthContext() {
-  return useContext(AuthContext)
+  const ctx = useContext(AuthContext)
+  if (ctx === undefined) {
+    throw new Error('useAuthContext must be used inside an AuthProvider')
+  }
+  return ctx
 }
