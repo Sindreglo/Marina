@@ -1,6 +1,6 @@
 'use client'
 
-import { Suspense } from 'react'
+import { Suspense, useEffect } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { Check } from 'lucide-react'
 import { useCourse } from '@/hooks/useCourse'
@@ -9,14 +9,26 @@ import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { LessonContent } from '@/components/course/LessonContent'
 import { NavButtons } from '@/components/course/NavButtons'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { useEditorContext } from '@/contexts/EditorContext'
 
 function CourseViewer() {
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { user } = useAuthContext()
+  const { setOwnedCourseId } = useEditorContext()
 
   const { course, loading } = useCourse(params.id)
   const { completed, toggle } = useProgress(params.id)
+
+  useEffect(() => {
+    if (course && user && course.teacherId === user.uid) {
+      setOwnedCourseId(params.id)
+    }
+    return () => setOwnedCourseId(null)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [course?.teacherId, user?.uid])
 
   if (loading) {
     return <div className="flex h-[calc(100vh-56px)] items-center justify-center text-ink-muted">Laster...</div>

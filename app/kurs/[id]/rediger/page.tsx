@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { Save, Globe } from 'lucide-react'
 import { useCourse } from '@/hooks/useCourse'
 import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
@@ -10,6 +9,7 @@ import { EditableLesson } from '@/components/editor/EditableLesson'
 import { NavButtons } from '@/components/course/NavButtons'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { LoadingScreen } from '@/components/LoadingScreen'
+import { useEditorContext } from '@/contexts/EditorContext'
 import type { Course, LessonType, Module, Lesson } from '@/types/course'
 
 function CourseEditor() {
@@ -17,6 +17,7 @@ function CourseEditor() {
   const searchParams = useSearchParams()
   const router = useRouter()
   const { user, loading: authLoading } = useAuthContext()
+  const { setControls } = useEditorContext()
 
   const { course, loading, updateCourse } = useCourse(authLoading || !user ? null : params.id)
   const [draft, setDraft] = useState<Course | null>(null)
@@ -29,6 +30,34 @@ function CourseEditor() {
   useEffect(() => {
     if (course && !draft) setDraft(course)
   }, [course, draft])
+
+  async function save() {
+    if (!draft) return
+    setSaving(true)
+    try { await updateCourse(draft) } finally { setSaving(false) }
+  }
+
+  async function togglePublish() {
+    if (!draft) return
+    const updated = { ...draft, published: !draft.published }
+    setDraft(updated)
+    setSaving(true)
+    try {
+      await updateCourse(updated)
+    } catch {
+      setDraft(draft)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  useEffect(() => {
+    if (!draft) return
+    setControls({ saving, published: draft.published, onSave: save, onTogglePublish: togglePublish })
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [saving, draft?.published])
+
+  useEffect(() => () => setControls(null), [])
 
   if (authLoading || !user || loading || !draft) {
     return <LoadingScreen />
@@ -96,26 +125,6 @@ function CourseEditor() {
     setTimeout(() => navigate(lessonId), 10)
   }
 
-  async function save() {
-    if (!draft) return
-    setSaving(true)
-    try { await updateCourse(draft) } finally { setSaving(false) }
-  }
-
-  async function togglePublish() {
-    if (!draft) return
-    const updated = { ...draft, published: !draft.published }
-    setDraft(updated)
-    setSaving(true)
-    try {
-      await updateCourse(updated)
-    } catch {
-      setDraft(draft)
-    } finally {
-      setSaving(false)
-    }
-  }
-
   return (
     <div className="flex h-[calc(100vh-56px)] overflow-hidden">
       <CourseSidebar
@@ -130,33 +139,6 @@ function CourseEditor() {
 
       {active ? (
         <div key={active.id} className="flex-1 flex flex-col overflow-hidden animate-fade-in">
-          {/* Toolbar */}
-          <div className="shrink-0 border-b border-border px-9 py-3 flex items-center justify-between"
-            style={{ background: 'rgba(250,249,247,0.9)', backdropFilter: 'blur(8px)' }}>
-            <div className="flex items-center gap-2 text-[12px] text-ink-muted">
-              <span className="w-2 h-2 rounded-full bg-yellow-400" /> Kladd
-            </div>
-            <div className="flex gap-2">
-              <button
-                onClick={save}
-                disabled={saving}
-                className="flex items-center gap-1.5 px-4 py-2 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
-              >
-                <Save size={13} /> {saving ? 'Lagrer...' : 'Lagre'}
-              </button>
-              <button
-                onClick={togglePublish}
-                disabled={saving}
-                className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 ${
-                  draft.published ? 'bg-green text-white hover:bg-green/90' : 'bg-accent text-white hover:bg-accent-hover'
-                }`}
-              >
-                <Globe size={13} /> {draft.published ? 'Avpubliser' : 'Publiser'}
-              </button>
-            </div>
-          </div>
-
-          {/* Editor body */}
           <div className="flex-1 overflow-y-auto">
             <div className="min-h-full flex flex-col px-9 items-center">
               <div className="flex-1 py-8 max-w-2xl w-full">
