@@ -36,7 +36,7 @@ export function LessonContent({ lesson, isEditor = false }: { lesson: Lesson; is
             <Play size={20} className="text-white ml-1" fill="white" />
           </div>
           <span className="absolute bottom-3 right-3 text-xs text-white bg-black/70 px-2 py-0.5 rounded">
-            {lesson.duration}
+            {lesson.duration} min
           </span>
         </div>
         {lesson.content && (

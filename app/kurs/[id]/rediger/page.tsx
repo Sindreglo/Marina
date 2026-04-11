@@ -61,7 +61,7 @@ function CourseEditor() {
 
   function addLesson(moduleId: string, type: LessonType) {
     const id = `l${newId()}`
-    const lesson: Lesson = { id, type, title: '', content: '', duration: '5 min', order: 0 }
+    const lesson: Lesson = { id, type, title: '', content: '', duration: 5, order: 0 }
     setDraft((d) => !d ? d : {
       ...d,
       modules: d.modules.map((m) =>
@@ -87,7 +87,7 @@ function CourseEditor() {
   function addModule() {
     const moduleId = `m${newId()}`
     const lessonId = `l${newId()}`
-    const lesson: Lesson = { id: lessonId, type: 'text', title: '', content: '', duration: '5 min', order: 0 }
+    const lesson: Lesson = { id: lessonId, type: 'text', title: '', content: '', duration: 5, order: 0 }
     setDraft((d) => {
       if (!d) return d
       const newModule: Module = { id: moduleId, title: 'Ny modul', order: d.modules.length, lessons: [lesson] }

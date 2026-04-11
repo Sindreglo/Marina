@@ -101,7 +101,7 @@ export function CourseSidebar({
                   >
                     {lesson.title || 'Uten tittel'}
                   </span>
-                  <span className="text-[11px] text-ink-light shrink-0">{lesson.duration}</span>
+                  <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
                 </>
               )
               return isEditor ? (

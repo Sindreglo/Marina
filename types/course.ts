@@ -7,7 +7,7 @@ export interface Lesson {
   type: LessonType
   title: string
   content: string
-  duration: string
+  duration: number
   order: number
 }
 

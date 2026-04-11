@@ -1,5 +1,6 @@
 'use client'
 
+import { useState } from 'react'
 import { FileText, ImageIcon, Video } from 'lucide-react'
 import type { Lesson, LessonType } from '@/types/course'
 import { LessonContent } from '@/components/course/LessonContent'
@@ -14,6 +15,8 @@ const TYPE_LABEL: Record<LessonType, string> = {
 }
 
 export function EditableLesson({ lesson, onChange }: { lesson: Lesson; onChange: (updated: Lesson) => void }) {
+  const [durationInput, setDurationInput] = useState(String(lesson.duration))
+
   function set<K extends keyof Lesson>(key: K, value: Lesson[K]) {
     onChange({ ...lesson, [key]: value })
   }
@@ -24,12 +27,22 @@ export function EditableLesson({ lesson, onChange }: { lesson: Lesson; onChange:
         <span className="flex items-center gap-1.5 text-[12px] font-semibold text-ink-muted bg-bg-warm px-2.5 py-1 rounded-md">
           {TYPE_ICON[lesson.type]} {TYPE_LABEL[lesson.type]}
         </span>
-        <input
-          value={lesson.duration}
-          onChange={(e) => set('duration', e.target.value)}
-          className="w-20 px-2 py-1 text-[12px] text-ink-muted border border-border rounded-md outline-none focus:border-accent transition-colors bg-white"
-          placeholder="10 min"
-        />
+        <div className="flex items-center border border-border rounded-md bg-white focus-within:border-accent transition-colors">
+          <input
+            type="number"
+            min={1}
+            value={durationInput}
+            onChange={(e) => setDurationInput(e.target.value)}
+            onBlur={() => {
+              const n = parseInt(durationInput, 10)
+              const valid = !isNaN(n) && n > 0 ? n : lesson.duration
+              setDurationInput(String(valid))
+              set('duration', valid)
+            }}
+            className="w-12 px-2 py-1 text-[12px] text-ink-muted outline-none bg-transparent"
+          />
+          <span className="pr-2 text-[12px] text-ink-muted">min</span>
+        </div>
       </div>
 
       <input
