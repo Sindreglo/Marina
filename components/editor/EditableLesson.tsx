@@ -27,7 +27,7 @@ export function EditableLesson({ lesson, onChange }: { lesson: Lesson; onChange:
         <input
           value={lesson.duration}
           onChange={(e) => set('duration', e.target.value)}
-          className="w-20 px-2 py-1 text-[12px] text-ink-muted border border-border rounded-md outline-none focus:border-accent transition-colors"
+          className="w-20 px-2 py-1 text-[12px] text-ink-muted border border-border rounded-md outline-none focus:border-accent transition-colors bg-white"
           placeholder="10 min"
         />
       </div>
@@ -46,19 +46,15 @@ export function EditableLesson({ lesson, onChange }: { lesson: Lesson; onChange:
       )}
 
       <label className="block text-[12px] font-semibold uppercase tracking-wide text-ink-muted mb-2">
-        {lesson.type === 'text' ? 'Innhold' : 'Beskrivelse'}
+        {lesson.type === 'text' ? 'Innhold' : 'Beskrivelse'}{lesson.type !== 'text' && <span className="ml-1.5 normal-case font-normal text-ink-light tracking-normal">— valgfritt</span>}
       </label>
       <textarea
         value={lesson.content}
         onChange={(e) => set('content', e.target.value)}
-        className="w-full px-3 py-3 border border-border rounded-lg outline-none text-[15px] transition-colors focus:border-accent leading-relaxed resize-y"
+        className="w-full px-3 py-3 border border-border rounded-lg outline-none text-[15px] transition-colors focus:border-accent leading-relaxed resize-y bg-white"
         style={{ minHeight: lesson.type === 'text' ? 240 : 80 }}
         placeholder={lesson.type === 'text' ? 'Skriv innholdet her...' : 'Legg til en beskrivelse...'}
       />
-
-      <div className="flex items-center gap-2 mt-5 p-4 bg-blue-soft rounded-xl text-[13px] text-blue">
-        Bytt til kursvisning for å se det slik studentene ser det.
-      </div>
     </div>
   )
 }

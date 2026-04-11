@@ -158,8 +158,8 @@ function CourseEditor() {
 
           {/* Editor body */}
           <div className="flex-1 overflow-y-auto">
-            <div className="min-h-full flex flex-col px-9">
-              <div className="flex-1 py-8">
+            <div className="min-h-full flex flex-col px-9 items-center">
+              <div className="flex-1 py-8 max-w-2xl w-full">
                 <p className="text-[13px] text-ink-light mb-5">
                   <span className="text-accent font-semibold">{active.moduleTitle}</span>
                   <span className="mx-1.5">›</span>
@@ -167,7 +167,7 @@ function CourseEditor() {
                 </p>
                 <EditableLesson lesson={active} onChange={updateLesson} />
               </div>
-              <div className="pb-6 pt-4 border-t border-border">
+              <div className="pb-6 max-w-2xl w-full">
                 <NavButtons prev={prev} next={next} onNav={navigate} />
               </div>
             </div>
