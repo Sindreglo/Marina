@@ -2,9 +2,10 @@
 
 import { createContext, useContext, useState } from 'react'
 
-interface EditorControls {
+export interface EditorControls {
   saving: boolean
   published: boolean
+  canSave: boolean
   onSave: () => void
   onTogglePublish: () => void
 }
@@ -12,22 +13,14 @@ interface EditorControls {
 interface EditorContextValue {
   controls: EditorControls | null
   setControls: (controls: EditorControls | null) => void
-  ownedCourseId: string | null
-  setOwnedCourseId: (id: string | null) => void
 }
 
-const EditorContext = createContext<EditorContextValue>({
-  controls: null,
-  setControls: () => {},
-  ownedCourseId: null,
-  setOwnedCourseId: () => {},
-})
+const EditorContext = createContext<EditorContextValue>({ controls: null, setControls: () => {} })
 
 export function EditorProvider({ children }: { children: React.ReactNode }) {
   const [controls, setControls] = useState<EditorControls | null>(null)
-  const [ownedCourseId, setOwnedCourseId] = useState<string | null>(null)
   return (
-    <EditorContext.Provider value={{ controls, setControls, ownedCourseId, setOwnedCourseId }}>
+    <EditorContext.Provider value={{ controls, setControls }}>
       {children}
     </EditorContext.Provider>
   )

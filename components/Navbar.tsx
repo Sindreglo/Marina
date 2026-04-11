@@ -19,8 +19,7 @@ export function Navbar() {
   const courseId = match?.[1] ?? null
   const isEditor = pathname.endsWith('/rediger')
 
-  const isOwnerNav = courseId && courseId !== 'ny' &&
-    (editor.controls !== null || editor.ownedCourseId === courseId)
+  const isOwnerNav = courseId && courseId !== 'ny' && editor.controls !== null
 
   const [teacherName, setTeacherName] = useState<string | null>(null)
 
@@ -72,28 +71,26 @@ export function Navbar() {
               </Link>
             </div>
 
-            {editor.controls && (
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={editor.controls.onSave}
-                  disabled={editor.controls.saving}
-                  className="flex items-center gap-1.5 px-4 py-1.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
-                >
-                  <Save size={13} /> {editor.controls.saving ? 'Lagrer...' : 'Lagre'}
-                </button>
-                <button
-                  onClick={editor.controls.onTogglePublish}
-                  disabled={editor.controls.saving}
-                  className={`flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 ${
-                    editor.controls.published
-                      ? 'bg-green text-white hover:bg-green/90'
-                      : 'bg-accent text-white hover:bg-accent-hover'
-                  }`}
-                >
-                  <Globe size={13} /> {editor.controls.published ? 'Avpubliser' : 'Publiser'}
-                </button>
-              </div>
-            )}
+            <div className="flex items-center gap-2">
+              <button
+                onClick={editor.controls!.onSave}
+                disabled={editor.controls!.saving || !editor.controls!.canSave}
+                className="flex items-center gap-1.5 px-4 py-1.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+              >
+                <Save size={13} /> {editor.controls!.saving ? 'Lagrer...' : 'Lagre'}
+              </button>
+              <button
+                onClick={editor.controls!.onTogglePublish}
+                disabled={editor.controls!.saving}
+                className={`flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 ${
+                  editor.controls!.published
+                    ? 'bg-green text-white hover:bg-green/90'
+                    : 'bg-accent text-white hover:bg-accent-hover'
+                }`}
+              >
+                <Globe size={13} /> {editor.controls!.published ? 'Avpubliser' : 'Publiser'}
+              </button>
+            </div>
           </>
         ) : (
           <>
@@ -101,19 +98,6 @@ export function Navbar() {
               <Link href="/" className="font-serif text-xl tracking-tight flex items-center gap-2 shrink-0">
                 <span className="text-accent">●</span> Lærdom
               </Link>
-
-              {courseId && courseId !== 'ny' && (
-                <div className="flex gap-1">
-                  <Link
-                    href={`/kurs/${courseId}`}
-                    className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                      !isEditor ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
-                    }`}
-                  >
-                    <BookOpen size={14} /> Kursvisning
-                  </Link>
-                </div>
-              )}
             </div>
 
             <div className="flex items-center gap-2">

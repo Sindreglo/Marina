@@ -2,7 +2,6 @@
 
 import { Suspense, useState, useEffect } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
-import { useCourse } from '@/hooks/useCourse'
 import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { EditableLesson } from '@/components/editor/EditableLesson'
@@ -10,6 +9,7 @@ import { NavButtons } from '@/components/course/NavButtons'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { useEditorContext } from '@/contexts/EditorContext'
+import { useCourseContext } from '@/contexts/CourseContext'
 import type { Course, LessonType, Module, Lesson } from '@/types/course'
 
 function CourseEditor() {
@@ -19,7 +19,7 @@ function CourseEditor() {
   const { user, loading: authLoading } = useAuthContext()
   const { setControls } = useEditorContext()
 
-  const { course, loading, updateCourse } = useCourse(authLoading || !user ? null : params.id)
+  const { course, loading, updateCourse } = useCourseContext()
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
 
@@ -53,7 +53,7 @@ function CourseEditor() {
 
   useEffect(() => {
     if (!draft) return
-    setControls({ saving, published: draft.published, onSave: save, onTogglePublish: togglePublish })
+    setControls({ saving, published: draft.published, canSave: true, onSave: save, onTogglePublish: togglePublish })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [saving, draft?.published])
 
