@@ -73,10 +73,9 @@ export async function createTeacherProfile(uid: string): Promise<void> {
   })
 }
 
-/** Caller must ensure the teacher document exists (call createTeacherProfile first). */
 export async function updateTeacherProfile(
   uid: string,
   data: Partial<Omit<TeacherProfile, 'uid' | 'createdAt'>>
 ): Promise<void> {
-  await updateDoc(doc(db, 'teachers', uid), data as Record<string, unknown>)
+  await setDoc(doc(db, 'teachers', uid), data as Record<string, unknown>, { merge: true })
 }

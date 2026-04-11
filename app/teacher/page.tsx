@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -16,6 +17,7 @@ export default function TeacherPage() {
   const [profile, setProfile] = useState<TeacherProfile | null>(null)
   const [profileForm, setProfileForm] = useState({ name: '', yearsExperience: 0, bio: '' })
   const [saving, setSaving] = useState(false)
+  const [saveError, setSaveError] = useState('')
   const [creating, setCreating] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
 
@@ -25,12 +27,16 @@ export default function TeacherPage() {
 
   useEffect(() => {
     if (!user) return
-    Promise.all([getTeacherCourses(user.uid), getTeacherProfile(user.uid)]).then(([c, p]) => {
-      setCourses(c)
-      setProfile(p)
-      if (p) setProfileForm({ name: p.name, yearsExperience: p.yearsExperience, bio: p.bio })
-      setDataLoading(false)
-    })
+    Promise.all([getTeacherCourses(user.uid), getTeacherProfile(user.uid)])
+      .then(([c, p]) => {
+        setCourses(c)
+        setProfile(p)
+        if (p) setProfileForm({ name: p.name, yearsExperience: p.yearsExperience, bio: p.bio })
+      })
+      .catch((err) => {
+        console.error('Failed to load teacher data:', err)
+      })
+      .finally(() => setDataLoading(false))
   }, [user])
 
   if (loading || !user || dataLoading) return <LoadingScreen />
@@ -38,16 +44,23 @@ export default function TeacherPage() {
   async function handleNewCourse() {
     if (!user) return
     setCreating(true)
-    const id = await createCourse(user.uid)
-    router.push(`/kurs/${id}/rediger`)
+    try {
+      const id = await createCourse(user.uid)
+      router.push(`/kurs/${id}/rediger`)
+    } finally {
+      setCreating(false)
+    }
   }
 
   async function saveProfile() {
     if (!user) return
     setSaving(true)
+    setSaveError('')
     try {
       await updateTeacherProfile(user.uid, profileForm)
       setProfile((p) => (p ? { ...p, ...profileForm } : p))
+    } catch {
+      setSaveError('Kunne ikke lagre profilen. Prøv igjen.')
     } finally {
       setSaving(false)
     }
@@ -71,10 +84,10 @@ export default function TeacherPage() {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-12">
           {courses.map((course) => (
-            <button
+            <Link
               key={course.id}
-              onClick={() => router.push(`/kurs/${course.id}/rediger`)}
-              className="text-left rounded-xl border border-border p-4 hover:border-ink/20 transition-colors group"
+              href={`/kurs/${course.id}/rediger`}
+              className="text-left rounded-xl border border-border p-4 hover:border-ink/20 transition-colors group block"
             >
               <div className="h-20 rounded-lg mb-3" style={{ background: course.coverColor }} />
               <div className="flex items-start justify-between gap-2">
@@ -91,7 +104,7 @@ export default function TeacherPage() {
                   {course.published ? 'Publisert' : 'Skjult'}
                 </span>
               </div>
-            </button>
+            </Link>
           ))}
         </div>
       )}
@@ -130,6 +143,7 @@ export default function TeacherPage() {
               placeholder="Fortell om deg selv..."
             />
           </div>
+          {saveError && <p className="text-[13px] text-red-500">{saveError}</p>}
           <button
             onClick={saveProfile}
             disabled={saving}
