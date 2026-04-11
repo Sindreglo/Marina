@@ -6,12 +6,16 @@ import { db } from '@/lib/firebase'
 import { updateCourse as firestoreUpdate } from '@/lib/firestore'
 import type { Course } from '@/types/course'
 
-export function useCourse(id: string) {
+export function useCourse(id: string | null) {
   const [course, setCourse] = useState<Course | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<Error | null>(null)
 
   useEffect(() => {
+    if (!id) {
+      setLoading(false)
+      return
+    }
     const unsub = onSnapshot(
       doc(db, 'courses', id),
       (snap) => {
@@ -28,7 +32,7 @@ export function useCourse(id: string) {
   }, [id])
 
   const updateCourse = useCallback(
-    (updated: Course) => firestoreUpdate(id, updated),
+    (updated: Course) => id ? firestoreUpdate(id, updated) : Promise.reject(new Error('Course ID is not available')),
     [id]
   )
 

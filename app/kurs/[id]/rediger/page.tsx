@@ -18,7 +18,7 @@ function CourseEditor() {
   const router = useRouter()
   const { user, loading: authLoading } = useAuthContext()
 
-  const { course, loading, updateCourse } = useCourse(params.id)
+  const { course, loading, updateCourse } = useCourse(authLoading || !user ? null : params.id)
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
 
