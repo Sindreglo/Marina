@@ -1,10 +1,11 @@
 'use client'
 
-import { Suspense, useState, useEffect } from 'react'
+import { Suspense, useState, useEffect, useRef } from 'react'
 import { useParams, useSearchParams, useRouter } from 'next/navigation'
 import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { EditableLesson } from '@/components/editor/EditableLesson'
+import { EditableCourseInfo } from '@/components/editor/EditableCourseInfo'
 import { NavButtons } from '@/components/course/NavButtons'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { LoadingScreen } from '@/components/LoadingScreen'
@@ -19,9 +20,11 @@ function CourseEditor() {
   const { user, loading: authLoading } = useAuthContext()
   const { setControls } = useEditorContext()
 
-  const { course, loading, updateCourse } = useCourseContext()
+  const { course, loading, updateCourse, deleteCourse } = useCourseContext()
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
+  const draftRef = useRef(draft)
+  draftRef.current = draft
 
   useEffect(() => {
     if (!authLoading && !user) router.replace('/login')
@@ -32,20 +35,22 @@ function CourseEditor() {
   }, [course, draft])
 
   async function save() {
-    if (!draft) return
+    const d = draftRef.current
+    if (!d) return
     setSaving(true)
-    try { await updateCourse(draft) } finally { setSaving(false) }
+    try { await updateCourse(d) } finally { setSaving(false) }
   }
 
   async function togglePublish() {
-    if (!draft) return
-    const updated = { ...draft, published: !draft.published }
+    const d = draftRef.current
+    if (!d) return
+    const updated = { ...d, published: !d.published }
     setDraft(updated)
     setSaving(true)
     try {
       await updateCourse(updated)
     } catch {
-      setDraft(draft)
+      setDraft(d)
     } finally {
       setSaving(false)
     }
@@ -68,9 +73,10 @@ function CourseEditor() {
   }
 
   const flat = flatLessons(draft)
-  const activeId = searchParams.get('leksjon') ?? flat[0]?.id ?? ''
-  const active = flat.find((l) => l.id === activeId) ?? flat[0]
-  const idx = flat.findIndex((l) => l.id === activeId)
+  const activeId = searchParams.get('leksjon') ?? 'kursinfo'
+  const isCourseInfo = activeId === 'kursinfo'
+  const active = isCourseInfo ? null : (flat.find((l) => l.id === activeId) ?? flat[0] ?? null)
+  const idx = active ? flat.findIndex((l) => l.id === active.id) : -1
   const prev = idx > 0 ? flat[idx - 1] : null
   const next = idx < flat.length - 1 ? flat[idx + 1] : null
 
@@ -137,7 +143,17 @@ function CourseEditor() {
         onAddModule={addModule}
       />
 
-      {active ? (
+      {isCourseInfo ? (
+        <div key="kursinfo" className="flex-1 overflow-y-auto animate-fade-in">
+          <div className="px-9 py-8">
+            <EditableCourseInfo
+            draft={draft}
+            onChange={(updated) => setDraft(updated)}
+            onDelete={async () => { await deleteCourse(); router.push('/teacher') }}
+          />
+          </div>
+        </div>
+      ) : active ? (
         <div key={active.id} className="flex-1 flex flex-col overflow-hidden animate-fade-in">
           <div className="flex-1 overflow-y-auto">
             <div className="min-h-full flex flex-col px-9 items-center">

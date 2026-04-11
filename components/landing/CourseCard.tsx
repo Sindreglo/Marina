@@ -21,7 +21,6 @@ export function CourseCard({ course }: { course: Course }) {
       </div>
       <div className="p-4">
         <h3 className="text-[15px] font-semibold mb-2 leading-snug">{course.title}</h3>
-        <p className="text-[13px] text-ink-muted mb-3">{course.instructor}</p>
         <div className="flex justify-between text-xs text-ink-light">
           <span className="flex items-center gap-1">
             <Star size={12} className="text-yellow-400 fill-yellow-400" />

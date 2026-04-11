@@ -6,6 +6,7 @@ import {
   setDoc,
   updateDoc,
   addDoc,
+  deleteDoc,
   query,
   where,
   serverTimestamp,
@@ -46,7 +47,6 @@ export async function createCourse(teacherId: string): Promise<string> {
     category: 'Annet',
     level: 'Nybegynner',
     coverColor: '#E8553D',
-    instructor: '',
     teacherId,
     students: 0,
     rating: 0,
@@ -61,6 +61,10 @@ export async function getTeacherProfile(uid: string): Promise<TeacherProfile | n
   const snap = await getDoc(doc(db, 'teachers', uid))
   if (!snap.exists()) return null
   return { ...snap.data(), uid: snap.id } as TeacherProfile
+}
+
+export async function deleteCourse(id: string): Promise<void> {
+  await deleteDoc(doc(db, 'courses', id))
 }
 
 export async function createTeacherProfile(uid: string): Promise<void> {

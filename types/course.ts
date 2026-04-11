@@ -25,7 +25,6 @@ export interface Course {
   category: string
   level: string
   coverColor: string
-  instructor: string
   students: number
   rating: number
   published: boolean

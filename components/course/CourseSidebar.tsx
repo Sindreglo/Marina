@@ -1,6 +1,6 @@
 'use client'
 
-import { Check, FileText, ImageIcon, Video, Plus, Trash2 } from 'lucide-react'
+import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings } from 'lucide-react'
 import type { Course, LessonType } from '@/types/course'
 import { flatLessons } from '@/lib/utils'
 
@@ -59,6 +59,18 @@ export function CourseSidebar({
               {doneCount} av {flat.length} fullført
             </p>
           </>
+        )}
+        {isEditor && (
+          <button
+            onClick={() => onSelect('kursinfo')}
+            className={`mt-3 w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
+              activeId === 'kursinfo'
+                ? 'bg-accent-soft text-accent'
+                : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
+            }`}
+          >
+            <Settings size={13} /> Kursinformasjon
+          </button>
         )}
       </div>
 
