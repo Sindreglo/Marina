@@ -119,6 +119,23 @@ function CourseEditor() {
     }
   }
 
+  function renameLesson(lessonId: string, title: string) {
+    setDraft((d) => !d ? d : {
+      ...d,
+      modules: d.modules.map((m) => ({
+        ...m,
+        lessons: m.lessons.map((l) => l.id === lessonId ? { ...l, title } : l),
+      })),
+    })
+  }
+
+  function renameModule(moduleId: string, title: string) {
+    setDraft((d) => !d ? d : {
+      ...d,
+      modules: d.modules.map((m) => m.id === moduleId ? { ...m, title } : m),
+    })
+  }
+
   function addModule() {
     const moduleId = `m${newId()}`
     const lessonId = `l${newId()}`
@@ -141,6 +158,8 @@ function CourseEditor() {
         onAddLesson={addLesson}
         onDeleteLesson={deleteLesson}
         onAddModule={addModule}
+        onRenameModule={renameModule}
+        onRenameLesson={renameLesson}
       />
 
       {isCourseInfo ? (

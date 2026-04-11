@@ -53,22 +53,24 @@ export function Navbar() {
               >
                 <ArrowLeft size={14} /> Tilbake
               </Link>
-              <Link
-                href={`/kurs/${courseId}`}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  !isEditor ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
-                }`}
-              >
-                <BookOpen size={14} /> Kursvisning
-              </Link>
-              <Link
-                href={`/kurs/${courseId}/rediger`}
-                className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  isEditor ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
-                }`}
-              >
-                <PenLine size={14} /> Editor
-              </Link>
+              <div className="flex gap-1 p-1 bg-bg-warm rounded-lg">
+                <Link
+                  href={`/kurs/${courseId}`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                    !isEditor ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  <BookOpen size={13} /> Kursvisning
+                </Link>
+                <Link
+                  href={`/kurs/${courseId}/rediger`}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[13px] font-medium transition-colors ${
+                    isEditor ? 'bg-white text-ink shadow-sm' : 'text-ink-muted hover:text-ink'
+                  }`}
+                >
+                  <PenLine size={13} /> Editor
+                </Link>
+              </div>
             </div>
 
             <div className="flex items-center gap-2">

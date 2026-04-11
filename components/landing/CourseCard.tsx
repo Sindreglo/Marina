@@ -1,5 +1,5 @@
 import Link from 'next/link'
-import { BookOpen, Star } from 'lucide-react'
+import { BookOpen } from 'lucide-react'
 import type { Course } from '@/types/course'
 
 export function CourseCard({ course, href, showPublished }: {
@@ -7,7 +7,6 @@ export function CourseCard({ course, href, showPublished }: {
   href?: string
   showPublished?: boolean
 }) {
-  const lessonCount = course.modules.reduce((acc, m) => acc + m.lessons.length, 0)
   const link = href ?? `/kurs/${course.id}`
 
   return (
@@ -34,16 +33,8 @@ export function CourseCard({ course, href, showPublished }: {
       <div className="p-4">
         <h3 className="text-[15px] font-semibold mb-1.5 leading-snug">{course.title || 'Uten tittel'}</h3>
         {course.description && (
-          <p className="text-[13px] text-ink-muted leading-snug mb-2.5 line-clamp-2">{course.description}</p>
+          <p className="text-[13px] text-ink-muted leading-snug line-clamp-2">{course.description}</p>
         )}
-        <div className="flex justify-between text-xs text-ink-light">
-          <span className="flex items-center gap-1">
-            <Star size={12} className="text-yellow-400 fill-yellow-400" />
-            {course.rating.toFixed(1)}
-          </span>
-          <span>{lessonCount} leksjoner</span>
-          <span>{course.students.toLocaleString('nb-NO')} studenter</span>
-        </div>
       </div>
     </Link>
   )

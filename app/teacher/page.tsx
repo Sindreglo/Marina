@@ -4,22 +4,20 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Plus } from 'lucide-react'
 import { useAuthContext } from '@/contexts/AuthContext'
-import { createCourse, getTeacherCourses, getTeacherProfile, updateTeacherProfile } from '@/lib/firestore'
+import { createCourse, getTeacherCourses, submitFeedback } from '@/lib/firestore'
 import { LoadingScreen } from '@/components/LoadingScreen'
 import { CourseCard } from '@/components/landing/CourseCard'
 import type { Course } from '@/types/course'
-import type { TeacherProfile } from '@/types/teacher'
 
 export default function TeacherPage() {
   const { user, loading } = useAuthContext()
   const router = useRouter()
   const [courses, setCourses] = useState<Course[]>([])
-  const [profile, setProfile] = useState<TeacherProfile | null>(null)
-  const [profileForm, setProfileForm] = useState({ name: '', yearsExperience: 0, bio: '' })
-  const [saving, setSaving] = useState(false)
-  const [saveError, setSaveError] = useState('')
   const [creating, setCreating] = useState(false)
   const [dataLoading, setDataLoading] = useState(true)
+  const [feedback, setFeedback] = useState('')
+  const [feedbackSaving, setFeedbackSaving] = useState(false)
+  const [feedbackSent, setFeedbackSent] = useState(false)
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login')
@@ -27,15 +25,9 @@ export default function TeacherPage() {
 
   useEffect(() => {
     if (!user) return
-    Promise.all([getTeacherCourses(user.uid), getTeacherProfile(user.uid)])
-      .then(([c, p]) => {
-        setCourses(c)
-        setProfile(p)
-        if (p) setProfileForm({ name: p.name, yearsExperience: p.yearsExperience, bio: p.bio })
-      })
-      .catch((err) => {
-        console.error('Failed to load teacher data:', err)
-      })
+    getTeacherCourses(user.uid)
+      .then(setCourses)
+      .catch((err) => console.error('Failed to load courses:', err))
       .finally(() => setDataLoading(false))
   }, [user])
 
@@ -52,17 +44,16 @@ export default function TeacherPage() {
     }
   }
 
-  async function saveProfile() {
-    if (!user) return
-    setSaving(true)
-    setSaveError('')
+  async function handleFeedback() {
+    if (!user || !feedback.trim()) return
+    setFeedbackSaving(true)
     try {
-      await updateTeacherProfile(user.uid, profileForm)
-      setProfile((p) => (p ? { ...p, ...profileForm } : p))
-    } catch {
-      setSaveError('Kunne ikke lagre profilen. Prøv igjen.')
+      await submitFeedback(user.uid, user.email ?? '', feedback.trim())
+      setFeedback('')
+      setFeedbackSent(true)
+      setTimeout(() => setFeedbackSent(false), 3000)
     } finally {
-      setSaving(false)
+      setFeedbackSaving(false)
     }
   }
 
@@ -94,49 +85,23 @@ export default function TeacherPage() {
         </div>
       )}
 
-      <div className="border-t border-border pt-8">
-        <h2 className="font-serif text-xl mb-5">Din profil</h2>
-        <div className="flex flex-col gap-3 max-w-md">
-          <div>
-            <label className="block text-[12px] text-ink-muted mb-1">Navn</label>
-            <input
-              value={profileForm.name}
-              onChange={(e) => setProfileForm((f) => ({ ...f, name: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-white px-3 py-2 text-[14px] outline-none focus:border-accent transition-colors"
-              placeholder="Ditt navn"
-            />
-          </div>
-          <div>
-            <label className="block text-[12px] text-ink-muted mb-1">År med erfaring</label>
-            <input
-              type="number"
-              min={0}
-              value={profileForm.yearsExperience}
-              onChange={(e) =>
-                setProfileForm((f) => ({ ...f, yearsExperience: Number(e.target.value) }))
-              }
-              className="w-full rounded-lg border border-border bg-white px-3 py-2 text-[14px] outline-none focus:border-accent transition-colors"
-            />
-          </div>
-          <div>
-            <label className="block text-[12px] text-ink-muted mb-1">Om</label>
-            <textarea
-              rows={4}
-              value={profileForm.bio}
-              onChange={(e) => setProfileForm((f) => ({ ...f, bio: e.target.value }))}
-              className="w-full rounded-lg border border-border bg-white px-3 py-2 text-[14px] outline-none focus:border-accent transition-colors resize-none"
-              placeholder="Fortell om deg selv..."
-            />
-          </div>
-          {saveError && <p className="text-[13px] text-red-500">{saveError}</p>}
-          <button
-            onClick={saveProfile}
-            disabled={saving}
-            className="self-start px-4 py-2 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
-          >
-            {saving ? 'Lagrer...' : 'Lagre profil'}
-          </button>
-        </div>
+      <div className="border-t border-border pt-8 max-w-md">
+        <h2 className="font-serif text-xl mb-1.5">Tilbakemeldinger</h2>
+        <p className="text-[13px] text-ink-muted mb-4">Noe som ikke fungerer, eller en idé du vil dele?</p>
+        <textarea
+          value={feedback}
+          onChange={(e) => setFeedback(e.target.value)}
+          rows={4}
+          placeholder="Skriv din tilbakemelding her..."
+          className="w-full rounded-lg border border-border bg-white px-3 py-2.5 text-[14px] outline-none focus:border-accent transition-colors resize-none mb-3"
+        />
+        <button
+          onClick={handleFeedback}
+          disabled={feedbackSaving || !feedback.trim()}
+          className="px-4 py-2 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
+        >
+          {feedbackSaving ? 'Sender...' : feedbackSent ? 'Takk!' : 'Send tilbakemelding'}
+        </button>
       </div>
     </div>
   )

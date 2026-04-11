@@ -3,7 +3,8 @@
 import { useState } from 'react'
 import { FileText, ImageIcon, Video } from 'lucide-react'
 import type { Lesson, LessonType } from '@/types/course'
-import { LessonContent } from '@/components/course/LessonContent'
+import { VideoUploader } from '@/components/editor/VideoUploader'
+import { ImageUploader } from '@/components/editor/ImageUploader'
 
 const TYPE_ICON: Record<LessonType, React.ReactNode> = {
   text: <FileText size={14} />,
@@ -52,10 +53,20 @@ export function EditableLesson({ lesson, onChange }: { lesson: Lesson; onChange:
         placeholder="Leksjonstittel..."
       />
 
-      {(lesson.type === 'image' || lesson.type === 'video') && (
-        <div className="mb-4">
-          <LessonContent lesson={lesson} isEditor />
-        </div>
+      {lesson.type === 'image' && (
+        <ImageUploader
+          lessonId={lesson.id}
+          imageUrl={lesson.imageUrl}
+          onChange={(url) => set('imageUrl', url)}
+        />
+      )}
+
+      {lesson.type === 'video' && (
+        <VideoUploader
+          lessonId={lesson.id}
+          videoUrl={lesson.videoUrl}
+          onChange={(url) => set('videoUrl', url)}
+        />
       )}
 
       <label className="block text-[12px] font-semibold uppercase tracking-wide text-ink-muted mb-2">

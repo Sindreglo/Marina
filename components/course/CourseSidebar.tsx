@@ -1,6 +1,7 @@
 'use client'
 
-import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings } from 'lucide-react'
+import { useState, useRef } from 'react'
+import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil } from 'lucide-react'
 import type { Course, LessonType } from '@/types/course'
 import { flatLessons } from '@/lib/utils'
 
@@ -24,6 +25,8 @@ interface Props {
   onAddLesson?: (moduleId: string, type: LessonType) => void
   onDeleteLesson?: (moduleId: string, lessonId: string) => void
   onAddModule?: () => void
+  onRenameModule?: (moduleId: string, title: string) => void
+  onRenameLesson?: (lessonId: string, title: string) => void
 }
 
 export function CourseSidebar({
@@ -35,7 +38,39 @@ export function CourseSidebar({
   onAddLesson,
   onDeleteLesson,
   onAddModule,
+  onRenameModule,
+  onRenameLesson,
 }: Props) {
+  const [editingModuleId, setEditingModuleId] = useState<string | null>(null)
+  const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
+  const [editingTitle, setEditingTitle] = useState('')
+  const moduleInputRef = useRef<HTMLInputElement>(null)
+  const lessonInputRef = useRef<HTMLInputElement>(null)
+
+  function startRenameModule(moduleId: string, currentTitle: string) {
+    setEditingLessonId(null)
+    setEditingModuleId(moduleId)
+    setEditingTitle(currentTitle)
+    setTimeout(() => moduleInputRef.current?.select(), 0)
+  }
+
+  function commitRenameModule(moduleId: string) {
+    onRenameModule?.(moduleId, editingTitle.trim() || 'Ny modul')
+    setEditingModuleId(null)
+  }
+
+  function startRenameLesson(lessonId: string, currentTitle: string) {
+    setEditingModuleId(null)
+    setEditingLessonId(lessonId)
+    setEditingTitle(currentTitle)
+    setTimeout(() => lessonInputRef.current?.select(), 0)
+  }
+
+  function commitRenameLesson(lessonId: string) {
+    onRenameLesson?.(lessonId, editingTitle.trim() || 'Uten tittel')
+    setEditingLessonId(null)
+  }
+
   const flat = flatLessons(course)
   const doneCount = flat.filter((l) => completed.has(l.id)).length
 
@@ -78,70 +113,118 @@ export function CourseSidebar({
       <div className="flex-1 overflow-y-auto py-2">
         {course.modules.map((module, mi) => (
           <div key={module.id}>
-            <div className="flex items-center gap-1.5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-wide text-ink-light">
+            {/* Module header */}
+            <div className="flex items-center gap-1.5 px-4 py-2.5">
               <span className="w-4 h-4 rounded text-[10px] font-extrabold bg-accent-soft text-accent inline-flex items-center justify-center shrink-0">
                 {mi + 1}
               </span>
-              {module.title}
+              {isEditor && editingModuleId === module.id ? (
+                <input
+                  ref={moduleInputRef}
+                  value={editingTitle}
+                  onChange={(e) => setEditingTitle(e.target.value)}
+                  onBlur={() => commitRenameModule(module.id)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') commitRenameModule(module.id)
+                    if (e.key === 'Escape') setEditingModuleId(null)
+                  }}
+                  className="flex-1 text-[11px] font-bold uppercase tracking-wide text-ink-light bg-transparent outline-none border-b border-accent"
+                />
+              ) : (
+                <button
+                  onDoubleClick={() => isEditor && startRenameModule(module.id, module.title)}
+                  className="group/mod flex items-center gap-1.5 flex-1 min-w-0 text-left"
+                >
+                  <span className="text-[11px] font-bold uppercase tracking-wide text-ink-light truncate">
+                    {module.title}
+                  </span>
+                  {isEditor && (
+                    <Pencil size={10} className="shrink-0 text-ink-light opacity-0 group-hover/mod:opacity-100 transition-opacity" />
+                  )}
+                </button>
+              )}
             </div>
 
+            {/* Lessons */}
             {module.lessons.map((lesson) => {
               const isActive = lesson.id === activeId
               const isDone = completed.has(lesson.id)
-              const rowClass = `w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
-                isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
-              }`
-              const inner = (
-                <>
-                  {!isEditor ? (
-                    <span
-                      className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
-                        isDone ? 'bg-green text-white' : 'border-[1.5px] border-border text-ink-light'
-                      }`}
-                    >
-                      {isDone && <Check size={11} strokeWidth={3} />}
-                    </span>
-                  ) : (
+              const isEditingThis = editingLessonId === lesson.id
+
+              if (isEditor) {
+                return (
+                  <div
+                    key={lesson.id}
+                    className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
+                      isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
+                    }`}
+                    onClick={() => !isEditingThis && onSelect(lesson.id)}
+                    role="button"
+                    tabIndex={0}
+                    onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && onSelect(lesson.id)}
+                  >
                     <span className={`shrink-0 ${isActive ? 'text-accent' : 'text-ink-light'}`}>
                       {TYPE_ICON[lesson.type]}
                     </span>
-                  )}
-                  <span
-                    className={`text-[13px] flex-1 truncate ${
-                      isActive ? 'font-semibold text-accent' : isDone && !isEditor ? 'text-ink-muted' : 'text-ink'
-                    }`}
-                  >
-                    {lesson.title || 'Uten tittel'}
-                  </span>
-                  <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
-                </>
-              )
-              return isEditor ? (
-                <div
-                  key={lesson.id}
-                  className={rowClass}
-                  onClick={() => onSelect(lesson.id)}
-                  role="button"
-                  tabIndex={0}
-                  onKeyDown={(e) => e.key === 'Enter' && onSelect(lesson.id)}
-                >
-                  {inner}
-                  {onDeleteLesson && (
-                    <button
-                      onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
-                      className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
-                    >
-                      <Trash2 size={13} />
-                    </button>
-                  )}
-                </div>
-              ) : (
+
+                    {isEditingThis ? (
+                      <input
+                        ref={lessonInputRef}
+                        value={editingTitle}
+                        onChange={(e) => setEditingTitle(e.target.value)}
+                        onBlur={() => commitRenameLesson(lesson.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') commitRenameLesson(lesson.id)
+                          if (e.key === 'Escape') setEditingLessonId(null)
+                          e.stopPropagation()
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="flex-1 text-[13px] text-ink bg-transparent outline-none border-b border-accent min-w-0"
+                      />
+                    ) : (
+                      <button
+                        onDoubleClick={(e) => { e.stopPropagation(); startRenameLesson(lesson.id, lesson.title) }}
+                        className="group/les flex items-center gap-1 flex-1 min-w-0 text-left"
+                      >
+                        <span className={`text-[13px] truncate ${isActive ? 'font-semibold text-accent' : 'text-ink'}`}>
+                          {lesson.title || 'Uten tittel'}
+                        </span>
+                        <Pencil size={10} className="shrink-0 text-ink-light opacity-0 group-hover/les:opacity-100 transition-opacity" />
+                      </button>
+                    )}
+
+                    <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
+                    {onDeleteLesson && (
+                      <button
+                        onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
+                        className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
+                      >
+                        <Trash2 size={13} />
+                      </button>
+                    )}
+                  </div>
+                )
+              }
+
+              return (
                 <button
                   key={lesson.id}
                   onClick={() => onSelect(lesson.id)}
-                  className={rowClass}
+                  className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
+                    isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
+                  }`}
                 >
-                  {inner}
+                  <span className={`w-5 h-5 rounded-full flex items-center justify-center shrink-0 ${
+                    isDone ? 'bg-green text-white' : 'border-[1.5px] border-border text-ink-light'
+                  }`}>
+                    {isDone && <Check size={11} strokeWidth={3} />}
+                  </span>
+                  <span className={`text-[13px] flex-1 truncate ${
+                    isActive ? 'font-semibold text-accent' : isDone ? 'text-ink-muted' : 'text-ink'
+                  }`}>
+                    {lesson.title || 'Uten tittel'}
+                  </span>
+                  <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
                 </button>
               )
             })}

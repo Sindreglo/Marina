@@ -9,6 +9,8 @@ export interface Lesson {
   content: string
   duration: number
   order: number
+  videoUrl?: string
+  imageUrl?: string
 }
 
 export interface Module {

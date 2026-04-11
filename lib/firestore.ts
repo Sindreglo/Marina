@@ -57,6 +57,15 @@ export async function createCourse(teacherId: string): Promise<string> {
   return ref.id
 }
 
+export async function submitFeedback(uid: string, email: string, message: string): Promise<void> {
+  await addDoc(collection(db, 'feedback'), {
+    uid,
+    email,
+    message,
+    createdAt: serverTimestamp(),
+  })
+}
+
 export async function getTeacherProfile(uid: string): Promise<TeacherProfile | null> {
   const snap = await getDoc(doc(db, 'teachers', uid))
   if (!snap.exists()) return null

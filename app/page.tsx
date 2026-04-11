@@ -4,7 +4,6 @@ import { useCourses } from '@/hooks/useCourses'
 import { HeroSection } from '@/components/landing/HeroSection'
 import { StatsRow } from '@/components/landing/StatsRow'
 import { CourseCard } from '@/components/landing/CourseCard'
-import { CtaBanner } from '@/components/landing/CtaBanner'
 
 export default function LandingPage() {
   const { courses, loading } = useCourses()
@@ -32,9 +31,6 @@ export default function LandingPage() {
         )}
       </section>
 
-      <section className="max-w-5xl mx-auto px-6 pb-14">
-        <CtaBanner />
-      </section>
     </main>
   )
 }
