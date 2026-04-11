@@ -8,23 +8,30 @@ import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { EditableLesson } from '@/components/editor/EditableLesson'
 import { NavButtons } from '@/components/course/NavButtons'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { LoadingScreen } from '@/components/LoadingScreen'
 import type { Course, LessonType, Module, Lesson } from '@/types/course'
 
 function CourseEditor() {
   const params = useParams<{ id: string }>()
   const searchParams = useSearchParams()
   const router = useRouter()
+  const { user, loading: authLoading } = useAuthContext()
 
   const { course, loading, updateCourse } = useCourse(params.id)
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
 
   useEffect(() => {
+    if (!authLoading && !user) router.replace('/login')
+  }, [user, authLoading, router])
+
+  useEffect(() => {
     if (course && !draft) setDraft(course)
   }, [course, draft])
 
-  if (loading || !draft) {
-    return <div className="flex h-[calc(100vh-56px)] items-center justify-center text-ink-muted">Laster...</div>
+  if (authLoading || !user || loading || !draft) {
+    return <LoadingScreen />
   }
 
   function newId() {
