@@ -27,6 +27,10 @@ function CourseEditor() {
     return <div className="flex h-[calc(100vh-56px)] items-center justify-center text-ink-muted">Laster...</div>
   }
 
+  function newId() {
+    return Math.random().toString(36).slice(2, 10)
+  }
+
   const flat = flatLessons(draft)
   const activeId = searchParams.get('leksjon') ?? flat[0]?.id ?? ''
   const active = flat.find((l) => l.id === activeId) ?? flat[0]
@@ -49,7 +53,7 @@ function CourseEditor() {
   }
 
   function addLesson(moduleId: string, type: LessonType) {
-    const id = `l${Date.now()}`
+    const id = `l${newId()}`
     const lesson: Lesson = { id, type, title: '', content: '', duration: '5 min', order: 0 }
     setDraft((d) => !d ? d : {
       ...d,
@@ -74,8 +78,8 @@ function CourseEditor() {
   }
 
   function addModule() {
-    const moduleId = `m${Date.now()}`
-    const lessonId = `l${Date.now() + 1}`
+    const moduleId = `m${newId()}`
+    const lessonId = `l${newId()}`
     const lesson: Lesson = { id: lessonId, type: 'text', title: '', content: '', duration: '5 min', order: 0 }
     setDraft((d) => {
       if (!d) return d
@@ -95,7 +99,14 @@ function CourseEditor() {
     if (!draft) return
     const updated = { ...draft, published: !draft.published }
     setDraft(updated)
-    await updateCourse(updated)
+    setSaving(true)
+    try {
+      await updateCourse(updated)
+    } catch {
+      setDraft(draft)
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -128,7 +139,8 @@ function CourseEditor() {
               </button>
               <button
                 onClick={togglePublish}
-                className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold rounded-lg transition-colors ${
+                disabled={saving}
+                className={`flex items-center gap-1.5 px-4 py-2 text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 ${
                   draft.published ? 'bg-green text-white hover:bg-green/90' : 'bg-accent text-white hover:bg-accent-hover'
                 }`}
               >
