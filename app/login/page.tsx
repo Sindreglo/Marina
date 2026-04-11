@@ -1,10 +1,12 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { getTeacherProfile, createTeacherProfile } from '@/lib/firestore'
+import { useAuthContext } from '@/contexts/AuthContext'
+import { LoadingScreen } from '@/components/LoadingScreen'
 
 export default function LoginPage() {
   const router = useRouter()
@@ -13,20 +15,35 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  const { user: currentUser, loading: authLoading } = useAuthContext()
+
+  useEffect(() => {
+    if (!authLoading && currentUser) router.replace('/teacher')
+  }, [currentUser, authLoading, router])
+
+  if (authLoading) return <LoadingScreen />
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
     setLoading(true)
+    let user
     try {
-      const { user } = await signInWithEmailAndPassword(auth, email, password)
-      const profile = await getTeacherProfile(user.uid)
-      if (!profile) await createTeacherProfile(user.uid)
-      router.push('/teacher')
+      const credential = await signInWithEmailAndPassword(auth, email, password)
+      user = credential.user
     } catch {
       setError('Feil e-post eller passord. Prøv igjen.')
-    } finally {
       setLoading(false)
+      return
     }
+    try {
+      const profile = await getTeacherProfile(user.uid)
+      if (!profile) await createTeacherProfile(user.uid)
+    } catch {
+      console.error('Failed to load/create teacher profile for', user.uid)
+    }
+    setLoading(false)
+    router.push('/teacher')
   }
 
   return (
