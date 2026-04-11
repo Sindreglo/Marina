@@ -11,7 +11,7 @@ export default function NewCoursePage() {
   useEffect(() => {
     if (called.current) return
     called.current = true
-    createCourse().then((id) => {
+    createCourse('').then((id) => {
       router.replace(`/kurs/${id}/rediger`)
     })
   }, [router])
