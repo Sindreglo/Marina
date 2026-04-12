@@ -138,6 +138,30 @@ function CourseEditor() {
     })
   }
 
+  function moveLesson(lessonId: string, toModuleId: string, toIndex: number) {
+    setDraft((d) => {
+      if (!d) return d
+      let lesson: Lesson | null = null
+      const modulesWithout = d.modules.map((m) => ({
+        ...m,
+        lessons: m.lessons.filter((l) => {
+          if (l.id === lessonId) { lesson = l; return false }
+          return true
+        }),
+      }))
+      if (!lesson) return d
+      return {
+        ...d,
+        modules: modulesWithout.map((m) => {
+          if (m.id !== toModuleId) return m
+          const lessons = [...m.lessons]
+          lessons.splice(toIndex, 0, lesson!)
+          return { ...m, lessons }
+        }),
+      }
+    })
+  }
+
   function addModule() {
     const moduleId = `m${newId()}`
     const lessonId = `l${newId()}`
@@ -162,6 +186,7 @@ function CourseEditor() {
         onAddModule={addModule}
         onRenameModule={renameModule}
         onRenameLesson={renameLesson}
+        onMoveLesson={moveLesson}
         isOpen={sidebarOpen}
         onClose={() => setSidebarOpen(false)}
       />

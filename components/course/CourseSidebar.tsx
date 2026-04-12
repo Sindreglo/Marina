@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil, X } from 'lucide-react'
+import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil, X, GripVertical } from 'lucide-react'
 import type { Course, LessonType } from '@/types/course'
 import { flatLessons } from '@/lib/utils'
 
@@ -16,6 +16,11 @@ const TYPE_LABEL: Record<LessonType, string> = {
   video: 'Video',
 }
 
+interface DropTarget {
+  moduleId: string
+  index: number
+}
+
 interface Props {
   course: Course
   activeId: string
@@ -27,6 +32,7 @@ interface Props {
   onAddModule?: () => void
   onRenameModule?: (moduleId: string, title: string) => void
   onRenameLesson?: (lessonId: string, title: string) => void
+  onMoveLesson?: (lessonId: string, toModuleId: string, toIndex: number) => void
   isOpen?: boolean
   onClose?: () => void
 }
@@ -42,12 +48,15 @@ export function CourseSidebar({
   onAddModule,
   onRenameModule,
   onRenameLesson,
+  onMoveLesson,
   isOpen = true,
   onClose,
 }: Props) {
   const [editingModuleId, setEditingModuleId] = useState<string | null>(null)
   const [editingLessonId, setEditingLessonId] = useState<string | null>(null)
   const [editingTitle, setEditingTitle] = useState('')
+  const [draggingId, setDraggingId] = useState<string | null>(null)
+  const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
   const moduleInputRef = useRef<HTMLInputElement>(null)
   const lessonInputRef = useRef<HTMLInputElement>(null)
 
@@ -78,6 +87,35 @@ export function CourseSidebar({
   function handleSelect(id: string) {
     onSelect(id)
     onClose?.()
+  }
+
+  function handleDragOver(e: React.DragEvent, moduleId: string, index: number) {
+    e.preventDefault()
+    e.stopPropagation()
+    const rect = e.currentTarget.getBoundingClientRect()
+    const mid = rect.top + rect.height / 2
+    setDropTarget({ moduleId, index: e.clientY < mid ? index : index + 1 })
+  }
+
+  function handleModuleZoneDragOver(e: React.DragEvent, moduleId: string, lessonCount: number) {
+    e.preventDefault()
+    if (!dropTarget || dropTarget.moduleId !== moduleId) {
+      setDropTarget({ moduleId, index: lessonCount })
+    }
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault()
+    if (draggingId && dropTarget) {
+      onMoveLesson?.(draggingId, dropTarget.moduleId, dropTarget.index)
+    }
+    setDraggingId(null)
+    setDropTarget(null)
+  }
+
+  function handleDragEnd() {
+    setDraggingId(null)
+    setDropTarget(null)
   }
 
   const flat = flatLessons(course)
@@ -128,9 +166,17 @@ export function CourseSidebar({
       </div>
 
       {/* Modules */}
-      <div className="flex-1 overflow-y-auto py-2">
+      <div
+        className="flex-1 overflow-y-auto py-2"
+        onDragOver={draggingId ? (e) => e.preventDefault() : undefined}
+        onDrop={draggingId ? handleDrop : undefined}
+      >
         {course.modules.map((module, mi) => (
-          <div key={module.id}>
+          <div
+            key={module.id}
+            onDragOver={draggingId ? (e) => handleModuleZoneDragOver(e, module.id, module.lessons.length) : undefined}
+          >
+            {/* Module header */}
             <div className="flex items-center gap-1.5 px-4 py-2.5">
               <span className="w-4 h-4 rounded text-[10px] font-extrabold bg-accent-soft text-accent inline-flex items-center justify-center shrink-0">
                 {mi + 1}
@@ -162,59 +208,79 @@ export function CourseSidebar({
               )}
             </div>
 
-            {module.lessons.map((lesson) => {
+            {/* Drop indicator at top of module */}
+            {isEditor && dropTarget?.moduleId === module.id && dropTarget.index === 0 && (
+              <div className="mx-4 h-0.5 bg-accent rounded-full mb-0.5" />
+            )}
+
+            {/* Lessons */}
+            {module.lessons.map((lesson, li) => {
               const isActive = lesson.id === activeId
               const isDone = completed.has(lesson.id)
               const isEditingThis = editingLessonId === lesson.id
+              const isDragging = draggingId === lesson.id
+              const showDropAfter = isEditor && dropTarget?.moduleId === module.id && dropTarget.index === li + 1
 
               if (isEditor) {
                 return (
-                  <div
-                    key={lesson.id}
-                    className={`w-full text-left flex items-center gap-2.5 pl-7 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
-                      isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
-                    }`}
-                    onClick={() => !isEditingThis && handleSelect(lesson.id)}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && handleSelect(lesson.id)}
-                  >
-                    <span className={`shrink-0 ${isActive ? 'text-accent' : 'text-ink-light'}`}>
-                      {TYPE_ICON[lesson.type]}
-                    </span>
-                    {isEditingThis ? (
-                      <input
-                        ref={lessonInputRef}
-                        value={editingTitle}
-                        onChange={(e) => setEditingTitle(e.target.value)}
-                        onBlur={() => commitRenameLesson(lesson.id)}
-                        onKeyDown={(e) => {
-                          if (e.key === 'Enter') commitRenameLesson(lesson.id)
-                          if (e.key === 'Escape') setEditingLessonId(null)
-                          e.stopPropagation()
-                        }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="flex-1 text-[13px] text-ink bg-transparent outline-none border-b border-accent min-w-0"
-                      />
-                    ) : (
-                      <button
-                        onDoubleClick={(e) => { e.stopPropagation(); startRenameLesson(lesson.id, lesson.title) }}
-                        className="group/les flex items-center gap-1 flex-1 min-w-0 text-left"
-                      >
-                        <span className={`text-[13px] truncate ${isActive ? 'font-semibold text-accent' : 'text-ink'}`}>
-                          {lesson.title || 'Uten tittel'}
-                        </span>
-                        <Pencil size={10} className="shrink-0 text-ink-light opacity-0 group-hover/les:opacity-100 transition-opacity" />
-                      </button>
-                    )}
-                    <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
-                    {onDeleteLesson && (
-                      <button
-                        onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
-                        className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
-                      >
-                        <Trash2 size={13} />
-                      </button>
+                  <div key={lesson.id}>
+                    <div
+                      draggable
+                      onDragStart={() => setDraggingId(lesson.id)}
+                      onDragEnd={handleDragEnd}
+                      onDragOver={(e) => handleDragOver(e, module.id, li)}
+                      onDrop={(e) => { e.stopPropagation(); handleDrop(e) }}
+                      className={`w-full text-left flex items-center gap-2 pl-4 pr-3 py-2.5 border-r-[3px] transition-all duration-100 ${
+                        isActive ? 'bg-accent-soft border-accent' : 'border-transparent hover:bg-bg-warm'
+                      } ${isDragging ? 'opacity-40' : ''}`}
+                      onClick={() => !isEditingThis && handleSelect(lesson.id)}
+                      role="button"
+                      tabIndex={0}
+                      onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && handleSelect(lesson.id)}
+                    >
+                      <span className="shrink-0 text-ink-light/40 cursor-grab active:cursor-grabbing">
+                        <GripVertical size={14} />
+                      </span>
+                      <span className={`shrink-0 ${isActive ? 'text-accent' : 'text-ink-light'}`}>
+                        {TYPE_ICON[lesson.type]}
+                      </span>
+                      {isEditingThis ? (
+                        <input
+                          ref={lessonInputRef}
+                          value={editingTitle}
+                          onChange={(e) => setEditingTitle(e.target.value)}
+                          onBlur={() => commitRenameLesson(lesson.id)}
+                          onKeyDown={(e) => {
+                            if (e.key === 'Enter') commitRenameLesson(lesson.id)
+                            if (e.key === 'Escape') setEditingLessonId(null)
+                            e.stopPropagation()
+                          }}
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex-1 text-[13px] text-ink bg-transparent outline-none border-b border-accent min-w-0"
+                        />
+                      ) : (
+                        <button
+                          onDoubleClick={(e) => { e.stopPropagation(); startRenameLesson(lesson.id, lesson.title) }}
+                          className="group/les flex items-center gap-1 flex-1 min-w-0 text-left"
+                        >
+                          <span className={`text-[13px] truncate ${isActive ? 'font-semibold text-accent' : 'text-ink'}`}>
+                            {lesson.title || 'Uten tittel'}
+                          </span>
+                          <Pencil size={10} className="shrink-0 text-ink-light opacity-0 group-hover/les:opacity-100 transition-opacity" />
+                        </button>
+                      )}
+                      <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
+                      {onDeleteLesson && (
+                        <button
+                          onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
+                          className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
+                        >
+                          <Trash2 size={13} />
+                        </button>
+                      )}
+                    </div>
+                    {showDropAfter && (
+                      <div className="mx-4 h-0.5 bg-accent rounded-full mt-0.5" />
                     )}
                   </div>
                 )
@@ -242,6 +308,11 @@ export function CourseSidebar({
                 </button>
               )
             })}
+
+            {/* Drop indicator at end of module (when dragging over module zone past all lessons) */}
+            {isEditor && dropTarget?.moduleId === module.id && dropTarget.index === module.lessons.length && module.lessons.length > 0 && (
+              <div className="mx-4 h-0.5 bg-accent rounded-full mt-0.5" />
+            )}
 
             {isEditor && onAddLesson && (
               <div className="flex gap-1 pl-7 pr-4 py-2 flex-wrap">

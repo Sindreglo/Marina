@@ -2,8 +2,8 @@
 
 import { useCourses } from '@/hooks/useCourses'
 import { HeroSection } from '@/components/landing/HeroSection'
-import { StatsRow } from '@/components/landing/StatsRow'
 import { CourseCard } from '@/components/landing/CourseCard'
+import { Footer } from '@/components/landing/Footer'
 
 export default function LandingPage() {
   const { courses, loading } = useCourses()
@@ -11,10 +11,9 @@ export default function LandingPage() {
   return (
     <main>
       <HeroSection />
-      <StatsRow />
 
-      <section id="kurs" className="max-w-5xl mx-auto px-6 pb-12">
-        <h2 className="font-serif text-2xl mb-5">Populære kurs</h2>
+      <section id="kurs" className="max-w-5xl mx-auto px-6 pb-12 pt-10">
+        <h2 className="font-serif text-2xl mb-5">Kurs</h2>
 
         {loading ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(240px,1fr))] gap-4">
@@ -31,6 +30,7 @@ export default function LandingPage() {
         )}
       </section>
 
+      <Footer />
     </main>
   )
 }
