@@ -1,9 +1,43 @@
 'use client'
 
 import { useState, useRef } from 'react'
-import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil, X, GripVertical } from 'lucide-react'
+import { Check, FileText, ImageIcon, Video, Plus, Trash2, Settings, Pencil, X, GripVertical, HelpCircle } from 'lucide-react'
 import type { Course, LessonType } from '@/types/course'
 import { flatLessons } from '@/lib/utils'
+import { TourOverlay } from '@/components/tour/TourOverlay'
+
+const TOUR_STEPS = [
+  {
+    selector: '[data-tour="course-info"]',
+    title: 'Kursinformasjon',
+    description: 'Her setter du tittel, beskrivelse, kategori og nivå for kurset ditt.',
+  },
+  {
+    selector: '[data-tour="rename-module"]',
+    title: 'Gi modulen et navn',
+    description: 'Dobbelklikk på modulnavnet for å gi det et nytt navn.',
+  },
+  {
+    selector: '[data-tour="add-lesson"]',
+    title: 'Legg til leksjon',
+    description: 'Klikk på Tekst, Bilde eller Video for å legge til en ny leksjon i modulen.',
+  },
+  {
+    selector: '[data-tour="lesson-grip"]',
+    title: 'Endre rekkefølge',
+    description: 'Dra i dette ikonet for å flytte en leksjon til en annen posisjon eller modul.',
+  },
+  {
+    selector: '[data-tour="delete-lesson"]',
+    title: 'Slett leksjon',
+    description: 'Klikk her for å slette en leksjon fra modulen.',
+  },
+  {
+    selector: '[data-tour="add-module"]',
+    title: 'Ny modul',
+    description: 'Legg til en ny modul for å organisere leksjonene dine i temaer eller kapitler.',
+  },
+]
 
 const TYPE_ICON: Record<LessonType, React.ReactNode> = {
   text: <FileText size={15} />,
@@ -57,6 +91,7 @@ export function CourseSidebar({
   const [editingTitle, setEditingTitle] = useState('')
   const [draggingId, setDraggingId] = useState<string | null>(null)
   const [dropTarget, setDropTarget] = useState<DropTarget | null>(null)
+  const [tourStep, setTourStep] = useState<number | null>(null)
   const moduleInputRef = useRef<HTMLInputElement>(null)
   const lessonInputRef = useRef<HTMLInputElement>(null)
 
@@ -132,11 +167,22 @@ export function CourseSidebar({
             </p>
             <p className="text-[15px] font-semibold leading-snug">{course.title}</p>
           </div>
-          {onClose && (
-            <button onClick={onClose} className="md:hidden shrink-0 p-1 text-ink-muted hover:text-ink transition-colors mt-0.5">
-              <X size={18} />
-            </button>
-          )}
+          <div className="flex items-center gap-0.5 shrink-0 mt-0.5">
+            {isEditor && (
+              <button
+                onClick={() => setTourStep(0)}
+                className="p-1 text-ink-muted hover:text-accent transition-colors"
+                title="Kom i gang"
+              >
+                <HelpCircle size={16} />
+              </button>
+            )}
+            {onClose && (
+              <button onClick={onClose} className="md:hidden p-1 text-ink-muted hover:text-ink transition-colors">
+                <X size={18} />
+              </button>
+            )}
+          </div>
         </div>
         {!isEditor && flat.length > 0 && (
           <>
@@ -153,6 +199,7 @@ export function CourseSidebar({
         )}
         {isEditor && (
           <button
+            data-tour="course-info"
             onClick={() => handleSelect('kursinfo')}
             className={`mt-3 w-full text-left flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-[13px] font-medium transition-colors ${
               activeId === 'kursinfo'
@@ -195,6 +242,7 @@ export function CourseSidebar({
                 />
               ) : (
                 <button
+                  data-tour={mi === 0 ? 'rename-module' : undefined}
                   onDoubleClick={() => isEditor && startRenameModule(module.id, module.title)}
                   className="group/mod flex items-center gap-1.5 flex-1 min-w-0 text-left"
                 >
@@ -238,7 +286,7 @@ export function CourseSidebar({
                       tabIndex={0}
                       onKeyDown={(e) => e.key === 'Enter' && !isEditingThis && handleSelect(lesson.id)}
                     >
-                      <span className="shrink-0 text-ink-light/40 cursor-grab active:cursor-grabbing">
+                      <span data-tour={li === 0 && mi === 0 ? 'lesson-grip' : undefined} className="shrink-0 text-ink-light/40 cursor-grab active:cursor-grabbing">
                         <GripVertical size={14} />
                       </span>
                       <span className={`shrink-0 ${isActive ? 'text-accent' : 'text-ink-light'}`}>
@@ -272,6 +320,7 @@ export function CourseSidebar({
                       <span className="text-[11px] text-ink-light shrink-0">{lesson.duration} min</span>
                       {onDeleteLesson && (
                         <button
+                          data-tour={li === 0 && mi === 0 ? 'delete-lesson' : undefined}
                           onClick={(e) => { e.stopPropagation(); onDeleteLesson(module.id, lesson.id) }}
                           className="text-ink-light hover:text-accent shrink-0 p-0.5 transition-colors"
                         >
@@ -315,7 +364,7 @@ export function CourseSidebar({
             )}
 
             {isEditor && onAddLesson && (
-              <div className="flex gap-1 pl-7 pr-4 py-2 flex-wrap">
+              <div data-tour={mi === 0 ? 'add-lesson' : undefined} className="flex gap-1 pl-7 pr-4 py-2 flex-wrap">
                 {(['text', 'image', 'video'] as LessonType[]).map((type) => (
                   <button
                     key={type}
@@ -333,6 +382,7 @@ export function CourseSidebar({
         {isEditor && onAddModule && (
           <div className="px-4 py-2">
             <button
+              data-tour="add-module"
               onClick={onAddModule}
               className="w-full py-2.5 text-[13px] font-semibold text-ink-muted border-2 border-dashed border-border rounded-xl flex items-center justify-center gap-1.5 hover:border-accent hover:text-accent transition-all"
             >
@@ -359,6 +409,16 @@ export function CourseSidebar({
             {sidebar}
           </div>
         </div>
+      )}
+
+      {tourStep !== null && (
+        <TourOverlay
+          steps={TOUR_STEPS}
+          stepIndex={tourStep}
+          onNext={() => setTourStep((s) => Math.min((s ?? 0) + 1, TOUR_STEPS.length - 1))}
+          onPrev={() => setTourStep((s) => Math.max((s ?? 0) - 1, 0))}
+          onClose={() => setTourStep(null)}
+        />
       )}
     </>
   )
