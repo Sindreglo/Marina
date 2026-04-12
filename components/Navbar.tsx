@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { BookOpen, PenLine, Save, Globe, ArrowLeft } from 'lucide-react'
+import { BookOpen, PenLine, Globe, ArrowLeft, Loader2, Check } from 'lucide-react'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -74,13 +74,17 @@ export function Navbar() {
             </div>
 
             <div className="flex items-center gap-2">
-              <button
-                onClick={editor.controls!.onSave}
-                disabled={editor.controls!.saving || !editor.controls!.canSave}
-                className="flex items-center gap-1.5 px-3 md:px-4 py-1.5 bg-ink text-white text-[13px] font-semibold rounded-lg hover:bg-ink/90 transition-colors disabled:opacity-50"
-              >
-                <Save size={13} /> <span className="hidden sm:inline">{editor.controls!.saving ? 'Lagrer...' : 'Lagre'}</span>
-              </button>
+              {editor.controls!.canSave && (
+                <span className="hidden sm:flex items-center gap-1.5 text-[13px] text-ink-muted min-w-20">
+                  {editor.controls!.saving ? (
+                    <><Loader2 size={13} className="animate-spin" /> Lagrer...</>
+                  ) : editor.controls!.saved ? (
+                    <><Check size={13} className="text-green" /> Lagret</>
+                  ) : (
+                    <span className="text-ink-light">Ulagret</span>
+                  )}
+                </span>
+              )}
               <button
                 onClick={editor.controls!.onTogglePublish}
                 disabled={editor.controls!.saving}

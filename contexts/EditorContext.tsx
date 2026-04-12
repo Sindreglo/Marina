@@ -4,6 +4,7 @@ import { createContext, useContext, useState } from 'react'
 
 export interface EditorControls {
   saving: boolean
+  saved: boolean
   published: boolean
   canSave: boolean
   onSave: () => void

@@ -24,9 +24,12 @@ function CourseEditor() {
   const { course, loading, updateCourse, deleteCourse } = useCourseContext()
   const [draft, setDraft] = useState<Course | null>(null)
   const [saving, setSaving] = useState(false)
+  const [saved, setSaved] = useState(true)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const draftRef = useRef(draft)
   draftRef.current = draft
+  const isFirstDraft = useRef(true)
+  const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null)
 
   useEffect(() => {
     if (!authLoading && !user) router.replace('/login')
@@ -40,8 +43,27 @@ function CourseEditor() {
     const d = draftRef.current
     if (!d) return
     setSaving(true)
-    try { await updateCourse(d) } finally { setSaving(false) }
+    try {
+      await updateCourse(d)
+      setSaved(true)
+    } finally {
+      setSaving(false)
+    }
   }
+
+  // Autosave: debounce 1.5s after each draft change
+  useEffect(() => {
+    if (!draft) return
+    if (isFirstDraft.current) {
+      isFirstDraft.current = false
+      return
+    }
+    setSaved(false)
+    if (debounceRef.current) clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(() => { save() }, 1500)
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current) }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [draft])
 
   async function togglePublish() {
     const d = draftRef.current
@@ -51,6 +73,7 @@ function CourseEditor() {
     setSaving(true)
     try {
       await updateCourse(updated)
+      setSaved(true)
     } catch {
       setDraft(d)
     } finally {
@@ -60,9 +83,9 @@ function CourseEditor() {
 
   useEffect(() => {
     if (!draft) return
-    setControls({ saving, published: draft.published, canSave: true, onSave: save, onTogglePublish: togglePublish })
+    setControls({ saving, saved, published: draft.published, canSave: true, onSave: save, onTogglePublish: togglePublish })
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [saving, draft?.published])
+  }, [saving, saved, draft?.published])
 
   useEffect(() => () => setControls(null), [])
 

@@ -47,7 +47,7 @@ function CourseViewer() {
 
   useEffect(() => {
     if (!isOwner || !course) return
-    setControls({ saving, published: course.published, canSave: false, onSave: () => {}, onTogglePublish: togglePublish })
+    setControls({ saving, saved: true, published: course.published, canSave: false, onSave: () => {}, onTogglePublish: togglePublish })
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOwner, saving, course?.published])
 
