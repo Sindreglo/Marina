@@ -51,7 +51,7 @@ export default function LoginPage() {
       <div className="w-full max-w-sm">
         <div className="mb-8 text-center">
           <span className="font-serif text-3xl tracking-tight">
-            <span className="text-accent">●</span> Lærdom
+            <span className="text-accent">●</span> Marina
           </span>
           <p className="mt-2 text-[13px] text-ink-muted">Logg inn som lærer</p>
         </div>

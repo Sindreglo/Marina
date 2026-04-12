@@ -45,7 +45,7 @@ export function Navbar() {
           <>
             <div className="flex items-center gap-1">
               <Link href="/" className="font-serif text-xl tracking-tight flex items-center gap-2 shrink-0 mr-1 md:mr-3">
-                <span className="text-accent">●</span> <span className="hidden sm:inline">Lærdom</span>
+                <span className="text-accent">●</span> <span className="hidden sm:inline">Marina</span>
               </Link>
               <Link
                 href="/teacher"
@@ -98,7 +98,7 @@ export function Navbar() {
           <>
             <div className="flex items-center gap-8">
               <Link href="/" className="font-serif text-xl tracking-tight flex items-center gap-2 shrink-0">
-                <span className="text-accent">●</span> Lærdom
+                <span className="text-accent">●</span> Marina
               </Link>
             </div>
 

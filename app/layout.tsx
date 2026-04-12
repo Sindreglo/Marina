@@ -19,8 +19,8 @@ const dmSerifDisplay = DM_Serif_Display({
 })
 
 export const metadata: Metadata = {
-  title: 'Lærdom',
-  description: 'Norges læringsplattform — kunnskap som inspirerer',
+  title: 'Marina',
+  description: 'Matematikk gjort forståelig — av Marina Bambulyak',
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

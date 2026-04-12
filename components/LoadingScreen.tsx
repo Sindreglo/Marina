@@ -4,7 +4,7 @@ export function LoadingScreen() {
       <div className="relative flex items-center justify-center">
         <span className="absolute inline-flex h-12 w-12 animate-ping rounded-full bg-accent opacity-20" />
         <span className="relative font-serif text-2xl tracking-tight">
-          <span className="text-accent">●</span> Lærdom
+          <span className="text-accent">●</span> Marina
         </span>
       </div>
     </div>
