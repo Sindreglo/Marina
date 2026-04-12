@@ -29,6 +29,8 @@ export interface Course {
   coverColor: string
   students: number
   rating: number
+  ratingSum: number
+  ratingCount: number
   published: boolean
   teacherId: string
   createdAt: Timestamp

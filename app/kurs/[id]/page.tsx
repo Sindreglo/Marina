@@ -9,6 +9,7 @@ import { flatLessons } from '@/lib/utils'
 import { CourseSidebar } from '@/components/course/CourseSidebar'
 import { LessonContent } from '@/components/course/LessonContent'
 import { NavButtons } from '@/components/course/NavButtons'
+import { RatingModal } from '@/components/course/RatingModal'
 import { useAuthContext } from '@/contexts/AuthContext'
 import { useEditorContext } from '@/contexts/EditorContext'
 
@@ -22,6 +23,7 @@ function CourseViewer() {
   const { completed, toggle } = useProgress(params.id)
   const [saving, setSaving] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [showRating, setShowRating] = useState(false)
 
   const isOwner = !!(course && user && course.teacherId === user.uid)
 
@@ -109,12 +111,23 @@ function CourseViewer() {
                 next={next}
                 onNav={navigate}
                 exitHref={!isOwner ? '/' : undefined}
-                onFinish={!isOwner && !next ? () => toggle(active.id) : undefined}
+                onFinish={!isOwner && !next ? () => {
+                  const wasCompleted = completed.has(active.id)
+                  toggle(active.id)
+                  if (!wasCompleted && user) setShowRating(true)
+                } : undefined}
                 isFinished={!isOwner && !next ? completed.has(active.id) : undefined}
               />
             </div>
           </div>
         </main>
+      )}
+      {showRating && user && (
+        <RatingModal
+          courseId={params.id}
+          userId={user.uid}
+          onClose={() => setShowRating(false)}
+        />
       )}
     </div>
   )
