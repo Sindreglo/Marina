@@ -24,6 +24,17 @@ function CourseViewer() {
   const [saving, setSaving] = useState(false)
   const [sidebarOpen, setSidebarOpen] = useState(false)
   const [showRating, setShowRating] = useState(false)
+  const [anonId] = useState<string>(() => {
+    if (typeof window === 'undefined') return ''
+    const key = 'anon-id'
+    const existing = localStorage.getItem(key)
+    if (existing) return existing
+    const id = `anon-${Math.random().toString(36).slice(2, 12)}`
+    localStorage.setItem(key, id)
+    return id
+  })
+
+  const ratingUserId = user?.uid ?? anonId
 
   const isOwner = !!(course && user && course.teacherId === user.uid)
 
@@ -112,20 +123,19 @@ function CourseViewer() {
                 onNav={navigate}
                 exitHref={!isOwner ? '/' : undefined}
                 onFinish={!isOwner && !next ? () => {
-                  const wasCompleted = completed.has(active.id)
-                  toggle(active.id)
-                  if (!wasCompleted && user) setShowRating(true)
+                  if (!completed.has(active.id)) toggle(active.id)
+                  setShowRating(true)
                 } : undefined}
-                isFinished={!isOwner && !next ? completed.has(active.id) : undefined}
+                isFinished={undefined}
               />
             </div>
           </div>
         </main>
       )}
-      {showRating && user && (
+      {showRating && (
         <RatingModal
           courseId={params.id}
-          userId={user.uid}
+          userId={ratingUserId}
           onClose={() => setShowRating(false)}
         />
       )}
