@@ -6,7 +6,7 @@ const STATS = [
 
 export function HeroSection() {
   return (
-    <section className="pt-16 pb-4 text-center relative overflow-hidden">
+    <section className="pt-16 pb-4 px-6 text-center relative overflow-hidden">
       <div
         className="absolute -top-32 left-1/2 -translate-x-1/2 w-[600px] h-[600px] rounded-full pointer-events-none opacity-50"
         style={{

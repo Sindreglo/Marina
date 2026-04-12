@@ -18,8 +18,8 @@ export function LessonContent({ lesson, isEditor = false }: { lesson: Lesson; is
           <img
             src={lesson.imageUrl}
             alt={lesson.title}
-            className="w-full rounded-xl mb-3 object-cover"
-            style={{ maxHeight: 400 }}
+            className="w-full rounded-xl mb-3 object-contain bg-bg-warm"
+            style={{ maxHeight: 500 }}
           />
         ) : (
           <div className="h-56 rounded-xl border border-border flex flex-col items-center justify-center text-ink-muted mb-3"

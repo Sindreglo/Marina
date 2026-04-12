@@ -12,7 +12,7 @@ export default function LandingPage() {
     <main>
       <HeroSection />
 
-      <section id="kurs" className="max-w-5xl mx-auto px-6 pb-12 pt-10">
+      <section id="kurs" className="max-w-5xl mx-auto px-5 md:px-6 pb-12 pt-10">
         <h2 className="font-serif text-2xl mb-5">Kurs</h2>
 
         {loading ? (

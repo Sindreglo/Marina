@@ -135,8 +135,8 @@ export function ImageUploader({
         <img
           src={imageUrl}
           alt=""
-          className="w-full rounded-xl mt-3 object-cover"
-          style={{ maxHeight: 280 }}
+          className="w-full rounded-xl mt-3 object-contain bg-bg-warm"
+          style={{ maxHeight: 500 }}
         />
       )}
     </div>

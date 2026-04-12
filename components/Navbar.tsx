@@ -102,12 +102,12 @@ export function Navbar() {
               </Link>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1 md:gap-2">
               {user ? (
                 <>
                   <Link
                     href="/"
-                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`hidden md:block px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       pathname === '/' ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
                     }`}
                   >
@@ -115,7 +115,7 @@ export function Navbar() {
                   </Link>
                   <Link
                     href="/teacher"
-                    className={`px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                    className={`px-3 md:px-3.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${
                       pathname.startsWith('/teacher') ? 'bg-ink text-white' : 'text-ink-muted hover:text-ink hover:bg-bg-warm'
                     }`}
                   >
@@ -123,7 +123,7 @@ export function Navbar() {
                   </Link>
                   <button
                     onClick={handleSignOut}
-                    className="px-3.5 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
+                    className="px-3 md:px-3.5 py-1.5 rounded-lg text-sm font-medium text-ink-muted hover:text-ink hover:bg-bg-warm transition-colors"
                   >
                     Logg ut
                   </button>
