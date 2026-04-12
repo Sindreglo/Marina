@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { BookOpen, PenLine, Globe, ArrowLeft, Loader2, Check } from 'lucide-react'
+import { BookOpen, PenLine, Globe, ArrowLeft, Loader2, Check, EyeOff } from 'lucide-react'
 import { signOut } from 'firebase/auth'
 import { auth } from '@/lib/firebase'
 import { useAuthContext } from '@/contexts/AuthContext'
@@ -88,13 +88,27 @@ export function Navbar() {
               <button
                 onClick={editor.controls!.onTogglePublish}
                 disabled={editor.controls!.saving}
-                className={`flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-semibold rounded-lg transition-colors disabled:opacity-50 ${
+                className={`group flex items-center gap-1.5 px-3 md:px-4 py-1.5 text-[13px] font-semibold rounded-lg border transition-colors disabled:opacity-50 ${
                   editor.controls!.published
-                    ? 'bg-green text-white hover:bg-green/90'
-                    : 'bg-accent text-white hover:bg-accent-hover'
+                    ? 'bg-green/10 text-green border-green/30 hover:bg-red-50 hover:text-red-600 hover:border-red-200'
+                    : 'bg-accent text-white border-transparent hover:bg-accent-hover'
                 }`}
               >
-                <Globe size={13} /> <span className="hidden sm:inline">{editor.controls!.published ? 'Avpubliser' : 'Publiser'}</span>
+                {editor.controls!.published ? (
+                  <>
+                    <Globe size={13} className="group-hover:hidden" />
+                    <EyeOff size={13} className="hidden group-hover:block" />
+                    <span className="hidden sm:inline">
+                      <span className="group-hover:hidden">Publisert</span>
+                      <span className="hidden group-hover:inline">Skjul kurs</span>
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <Globe size={13} />
+                    <span className="hidden sm:inline">Publiser</span>
+                  </>
+                )}
               </button>
             </div>
           </>
